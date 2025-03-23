@@ -1,0 +1,2 @@
+# 忽略所有的 .bag 檔案
+realsense/bags/*.bag

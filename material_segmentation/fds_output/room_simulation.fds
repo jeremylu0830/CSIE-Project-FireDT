@@ -1,0 +1,102 @@
+&HEAD CHID='room_simulation', TITLE='Room with detected objects' /
+
+&REAC ID='POLYURETHANE'
+      FUEL='REAC_FUEL'
+      C=6.3
+      H=7.1
+      O=2.1
+      N=1.0
+      SOOT_YIELD=0.10
+      HEAT_OF_COMBUSTION=24000.
+      IDEAL=.TRUE. /
+
+&MESH IJK=100,50,30, XB=0.0,10.0,0.0,5.0,0.0,3.0 /
+
+! Material surface definitions
+&SURF ID='FIRE'
+      RGB=255,0,0
+      HRRPUA=1000.0
+      RAMP_Q='FIRE_RAMP' /
+
+&RAMP ID='FIRE_RAMP', T=0.0, F=0.0 /
+&RAMP ID='FIRE_RAMP', T=2.0, F=1.0 /
+&RAMP ID='FIRE_RAMP', T=8.0, F=1.0 /
+&RAMP ID='FIRE_RAMP', T=10.0, F=0.0 /
+
+&SURF ID='wood'
+      RGB=139,69,19
+      BACKING='VOID' /
+
+&SURF ID='leather'
+      RGB=160,82,45
+      BACKING='VOID' /
+
+&SURF ID='metal'
+      RGB=192,192,192
+      BACKING='VOID' /
+
+! Object definitions
+! chair - wood
+&OBST XB=6.800,7.300,0.962,1.462,1.667,1.767, SURF_ID='wood' /
+
+&OBST XB=6.750,6.850,0.912,1.012,0.000,1.667, SURF_ID='metal' /
+&OBST XB=6.750,6.850,1.412,1.512,0.000,1.667, SURF_ID='metal' /
+&OBST XB=7.250,7.350,0.912,1.012,0.000,1.667, SURF_ID='metal' /
+&OBST XB=7.250,7.350,1.412,1.512,0.000,1.667, SURF_ID='metal' /
+&OBST XB=6.800,7.300,0.962,1.062,1.767,2.367, SURF_ID='leather' /
+
+! chair - wood
+&OBST XB=6.841,7.341,1.144,1.644,1.680,1.780, SURF_ID='wood' /
+
+&OBST XB=6.791,6.891,1.094,1.194,0.000,1.680, SURF_ID='metal' /
+&OBST XB=6.791,6.891,1.594,1.694,0.000,1.680, SURF_ID='metal' /
+&OBST XB=7.291,7.391,1.094,1.194,0.000,1.680, SURF_ID='metal' /
+&OBST XB=7.291,7.391,1.594,1.694,0.000,1.680, SURF_ID='metal' /
+&OBST XB=6.841,7.341,1.144,1.244,1.780,2.380, SURF_ID='leather' /
+
+! chair - leather
+&OBST XB=6.185,6.685,0.819,1.319,1.471,1.571, SURF_ID='leather' /
+
+&OBST XB=6.135,6.235,0.769,0.869,0.000,1.471, SURF_ID='metal' /
+&OBST XB=6.135,6.235,1.269,1.369,0.000,1.471, SURF_ID='metal' /
+&OBST XB=6.635,6.735,0.769,0.869,0.000,1.471, SURF_ID='metal' /
+&OBST XB=6.635,6.735,1.269,1.369,0.000,1.471, SURF_ID='metal' /
+&OBST XB=6.185,6.685,0.819,0.919,1.571,2.171, SURF_ID='leather' /
+
+! chair - leather
+&OBST XB=5.520,6.020,1.127,1.627,1.447,1.547, SURF_ID='leather' /
+
+&OBST XB=5.470,5.570,1.077,1.177,0.000,1.447, SURF_ID='metal' /
+&OBST XB=5.470,5.570,1.577,1.677,0.000,1.447, SURF_ID='metal' /
+&OBST XB=5.970,6.070,1.077,1.177,0.000,1.447, SURF_ID='metal' /
+&OBST XB=5.970,6.070,1.577,1.677,0.000,1.447, SURF_ID='metal' /
+&OBST XB=5.520,6.020,1.127,1.227,1.547,2.147, SURF_ID='leather' /
+
+! dining table - leather
+&OBST XB=4.394,8.394,0.203,2.203,1.502,1.602, SURF_ID='leather' /
+&OBST XB=4.344,4.444,0.153,0.253,0.000,1.502, SURF_ID='metal' /
+&OBST XB=4.344,4.444,2.153,2.253,0.000,1.502, SURF_ID='metal' /
+&OBST XB=8.344,8.444,0.153,0.253,0.000,1.502, SURF_ID='metal' /
+&OBST XB=8.344,8.444,2.153,2.253,0.000,1.502, SURF_ID='metal' /
+
+! dining table - leather
+&OBST XB=4.028,8.028,0.282,2.282,1.460,1.560, SURF_ID='leather' /
+&OBST XB=3.978,4.078,0.232,0.332,0.000,1.460, SURF_ID='metal' /
+&OBST XB=3.978,4.078,2.232,2.332,0.000,1.460, SURF_ID='metal' /
+&OBST XB=7.978,8.078,0.232,0.332,0.000,1.460, SURF_ID='metal' /
+&OBST XB=7.978,8.078,2.232,2.332,0.000,1.460, SURF_ID='metal' /
+
+! chair - leather
+&OBST XB=5.889,6.389,0.908,1.408,1.505,1.605, SURF_ID='leather' /
+
+&OBST XB=5.839,5.939,0.858,0.958,0.000,1.505, SURF_ID='metal' /
+&OBST XB=5.839,5.939,1.358,1.458,0.000,1.505, SURF_ID='metal' /
+&OBST XB=6.339,6.439,0.858,0.958,0.000,1.505, SURF_ID='metal' /
+&OBST XB=6.339,6.439,1.358,1.458,0.000,1.505, SURF_ID='metal' /
+&OBST XB=5.889,6.389,0.908,1.008,1.605,2.205, SURF_ID='leather' /
+
+! Fire source
+&OBST XB=4.5,5.5,2.0,3.0,0.0,0.5, COLOR='RED', SURF_ID='FIRE' /
+&SLCF PBY = 2, QUANTITY='TEMPERATURE' /
+
+&TAIL /
