@@ -1,7 +1,7 @@
 """
 Correctly get 2d-image from pointclouds information, NO NEED of Intel Realsense when running this program.
-Input:  .csv
-Output: projection image of pointclouds.
+Input:  .bag
+Output: .csv and .png (projection image of pointclouds)
 
 TO-DO: 顏色都是錯的，感覺是 bag 的問題 
 """
