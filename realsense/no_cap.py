@@ -30,6 +30,10 @@ pipeline.start(config)
 try:
     while True:
         frames = pipeline.wait_for_frames()
+        
+        if not frames:
+            print("[INFO] No more frames available, exiting.")
+            break
 
         # **確保深度影像與 RGB 影像同步**
         align = rs.align(rs.stream.color)
@@ -73,17 +77,11 @@ try:
         # **在全黑背景上畫出投射完的點雲**
         for i in range(len(tex_x)):
             r, g, b = colors[i]
+            r, g, b = b, g, r
             cv2.circle(blank_image, (tex_x[i], tex_y[i]), 2, (int(r), int(g), int(b)), -1)
-
-        # # **合併影像**
-        # combined_image = np.hstack((color_image, blank_image))
-
-        # # **顯示影像**
-        # cv2.imshow('RealSense - Left: RGB | Right: 3D Projection', combined_image)
 
         # 儲存影像和點雲資料
         timestamp = time.strftime("%Y%m%d_%H%M%S")
-        cv2.imwrite(os.path.join(BASE_DIR, 'projections', f"color_{timestamp}.png"), color_image)
         cv2.imwrite(os.path.join(BASE_DIR, 'projections', f"projection_{timestamp}.png"), blank_image)
         print(f"[INFO] saved color_{timestamp}.png and projection_{timestamp}.png")
 

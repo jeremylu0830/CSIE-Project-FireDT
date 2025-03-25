@@ -7,6 +7,7 @@ import pyrealsense2 as rs
 import numpy as np
 import pandas as pd
 import os
+import time
 
 # 指定 .bag 檔案路徑
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -65,7 +66,8 @@ try:
                 X, Y, Z = point
 
                 # 取得 RGB 值
-                R, G, B = color_image[y, x]
+                R, G, B = color_image[y, x]    # OpenCV 預設讀 BGR
+                R, G, B = B, G, R
 
                 # 儲存資料
                 data.append({'X': X, 'Y': Y, 'Z': Z, 'R': R, 'G': G, 'B': B})
