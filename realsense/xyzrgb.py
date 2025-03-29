@@ -70,7 +70,7 @@ try:
                 R, G, B = B, G, R
 
                 # 儲存資料
-                data.append({'X': X, 'Y': Y, 'Z': Z, 'R': R, 'G': G, 'B': B})
+                data.append({'x': X, 'y': Y, 'z': Z, 'R': R, 'G': G, 'B': B})
 
     # 將資料轉換為 DataFrame
     df = pd.DataFrame(data)
