@@ -2,3 +2,8 @@
 realsense/bags/*.bag
 realsense/pointclouds/*.csv
 realsense/projections/*.png
+material_segmentation/fds_output/*
+
+# 例外：保留所有 .fds 和 .smv 文件
+!material_segmentation/fds_output/*.fds
+!material_segmentation/fds_output/*.smv
