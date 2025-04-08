@@ -5,6 +5,7 @@ from models.googlenet import googlenet
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
+import pandas as pd
 
 import torch
 import torch.nn as nn
@@ -141,21 +142,31 @@ postprocessor = DenseCRF(
     bi_w=4,
 )
 
-# 由這邊讀檔
-img_num = 5
-img_path = os.path.join(BASE_DIR, "images", f"test{img_num}.jpg")
+# ------- projection -------
+img_num = '20250329_193301'
+img_path = os.path.join(os.path.dirname(BASE_DIR), 'realsense', 'projections', f'projection_{img_num}.jpg')
+print(f"image path: {img_path}")
 img = cv2.imread(img_path)
-img = cv2.resize(img, (512, 512))
 
+# ------- pointclouds -------
+# img_num = '20250329_193301'
+# point_path = os.path.join(os.path.dirname(BASE_DIR), 'realsense', 'pointclouds', f'pointcloud_{img_num}.csv')
+point_path = os.path.join(BASE_DIR, 'results', f'pointcloud_with_objects.csv')
+df = pd.read_csv(point_path)
+        
+# ------- image processing -------
+img = cv2.resize(img, (512, 512))
 prob0 = multi_scale_inference(img, m0)
 prob = prob0 
 
-prob = cv2.resize(prob, (480, 640))
-img = cv2.resize(img, (480, 640))
+prob = cv2.resize(prob, (640, 480))
+img = cv2.resize(img, (640, 480))
 prob = prob.transpose(2, 0, 1)
 prob = postprocessor(img, prob)
 labelmap = np.argmax(prob, axis=0)
 
+
+# ------- drawing -------
 plt.figure(figsize=(10, 10))
 plt.imshow(img[:, :, ::-1])
 
@@ -170,6 +181,26 @@ for i in range(23):
     ax.axis("off")
 
 plt.tight_layout()
-plt.savefig(os.path.join(BASE_DIR, 'results', f"result{img_num}.png"))
+plt.savefig(os.path.join(BASE_DIR, 'results', f"result_{img_num}.png"))
 # plt.show()
-np.savetxt(os.path.join(BASE_DIR, 'labelmaps', f"test{img_num}_labelmap.txt"), labelmap, fmt='%d')
+np.savetxt(os.path.join(BASE_DIR, 'labelmaps', f"test_{img_num}_labelmap.txt"), labelmap, fmt='%d')
+
+
+
+# save material in pointclouds csv
+def get_material(row):
+    u, v = int(row['u']), int(row['v'])
+    # 注意 labelmap 的索引順序通常為 [v, u]，確保 v 與 u 在正確範圍內
+    if 0 <= u < labelmap.shape[1] and 0 <= v < labelmap.shape[0]:
+        label_index = labelmap[v, u]
+        # 若 label_index 超出 labels 長度，則可以做防呆處理
+        if label_index < len(labels):
+            return labels[label_index]
+        else:
+            return ""
+    else:
+        return ""
+
+df['material'] = df.apply(get_material, axis=1)
+output_csv_path = os.path.join(os.path.dirname(BASE_DIR), 'realsense', 'pointclouds', f'pointcloud_{img_num}_with_material.csv')
+df.to_csv(output_csv_path, index=False)
