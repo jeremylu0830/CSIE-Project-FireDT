@@ -7,7 +7,10 @@ import pyrealsense2 as rs
 import numpy as np
 import cv2
 import time
+import os
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+os.makedirs(os.path.join(BASE_DIR, 'colordepth'), exist_ok=True)
 pipeline = rs.pipeline()
 config = rs.config()
 config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
@@ -42,8 +45,8 @@ try:
         elif key == ord('s'):
             # 按下 's' 儲存
             timestamp = time.strftime("%Y%m%d_%H%M%S")
-            color_filename = f"color_{timestamp}.png"
-            depth_filename = f"depth_colormap_{timestamp}.png"
+            color_filename = os.path.join(BASE_DIR, 'colordepth', f"color_{timestamp}.png")
+            depth_filename = os.path.join(BASE_DIR, 'colordepth', f"depth_colormap_{timestamp}.png")
             cv2.imwrite(color_filename, color_image)
             cv2.imwrite(depth_filename, depth_colormap)
             print(f"[INFO] 已儲存 {color_filename} 與 {depth_filename}")
