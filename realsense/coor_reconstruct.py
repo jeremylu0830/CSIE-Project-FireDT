@@ -1,95 +1,135 @@
-import open3d as o3d
+import pyrealsense2 as rs
 import numpy as np
 import pandas as pd
 import os
+import open3d as o3d
 
+# 設定 .bag 檔案的路徑
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+bag_file = os.path.join(BASE_DIR, 'bags', '20250311_140524.bag')
 
-def load_csv_to_pcd(csv_file):
-    """
-    讀取 CSV 檔案，CSV 必須包含 x, y, z, R, G, B 欄位。
-    回傳 Open3D 點雲，顏色歸一化至 [0, 1] 範圍。
-    """
-    df = pd.read_csv(csv_file)
-    points = df[['x', 'y', 'z']].to_numpy()
-    colors = df[['R', 'G', 'B']].to_numpy() / 255.0  # 將 0-255 轉成 0-1
-    pcd = o3d.geometry.PointCloud()
-    pcd.points = o3d.utility.Vector3dVector(points)
-    pcd.colors = o3d.utility.Vector3dVector(colors)
-    return pcd
+# 讀取 CSV 檔案
+csv_file = os.path.join(BASE_DIR, 'pointclouds', 'pointcloud_20250419_202146.csv')  # 用你的 CSV 檔案路徑
+df = pd.read_csv(csv_file)
 
-def pairwise_registration(source, target, voxel_size):
-    """
-    對兩個點雲進行配準，回傳 ICP 得到的變換矩陣與配準結果評估值。
-    """
-    # 進行體素下採樣
-    source_down = source.voxel_down_sample(voxel_size)
-    target_down = target.voxel_down_sample(voxel_size)
+# 設定參考點
+referencePoints_pixelDepth = [
+    [475, 83, 691],
+    [958, 130, 638],
+    [330, 621, 551],
+    [1395, 648, 577]
+]
 
-    # 估計法線，供 ICP 演算法使用
-    radius_normal = voxel_size * 2.0
-    source_down.estimate_normals(o3d.geometry.KDTreeSearchParamHybrid(radius=radius_normal, max_nn=30))
-    target_down.estimate_normals(o3d.geometry.KDTreeSearchParamHybrid(radius=radius_normal, max_nn=30))
+referencePoints_realWorld = np.array([
+    [0.002, 0.3, 0.0, 1.0],
+    [0.2468, 0.2415, 0.033, 1.0],
+    [0.0, 0.0, 0.033, 1.0],
+    [0.43, 0.0, 0.0, 1.0]
+])
 
-    # 執行點對點 ICP 配準
-    max_corr_distance = voxel_size * 4.0
-    result_icp = o3d.pipelines.registration.registration_icp(
-        source_down, target_down, max_corr_distance, np.identity(4),
-        o3d.pipelines.registration.TransformationEstimationPointToPoint())
-    
-    return result_icp.transformation, result_icp
+class ImageAndDepth2RealWorldTransformator:
+    def __init__(self, intrinsics, referencePoints_pixelDepth, referencePoints_realWorld):
+        self.intrinsics = intrinsics
+        np_pixelDepth = np.array(referencePoints_pixelDepth)
 
-def register_point_clouds(pcds, voxel_size=0.02):
-    """
-    將多個點雲依序配準並融合到一起，
-    這裡假設點雲序列有部分重疊，可以利用 pairwise ICP 進行初步配準。
-    """
-    print("開始點雲配準與融合...")
-    # 以第一個點雲作為全局點雲的初始值
-    accumulated_pcd = pcds[0]
-    transformation_global = np.identity(4)
-    
-    # 將其他點雲依序與當前全局點雲做 ICP 配準
-    for i in range(1, len(pcds)):
-        print(f"配準第 {i} 幀點雲...")
-        source = pcds[i]
-        # 以目前累積的全局點雲作為 target
-        transformation_icp, icp_result = pairwise_registration(source, accumulated_pcd, voxel_size)
-        print(f"Frame {i} ICP 變換矩陣:\n", transformation_icp)
-        # 更新來源點雲：將 source 轉到全局坐標系
-        source.transform(transformation_icp)
-        # 融合進累積點雲
-        accumulated_pcd += source
-        # 為了避免點雲數量過多，做一次體素下採樣
-        accumulated_pcd = accumulated_pcd.voxel_down_sample(voxel_size)
-    
-    return accumulated_pcd
+        # Assert 檢查
+        assert np_pixelDepth.shape[0] >= 4, "Array must have at least 4 rows"
+        assert np_pixelDepth.shape[1] == 3, "Array must have exactly 3 columns"
+        assert referencePoints_realWorld.shape[0] == np_pixelDepth.shape[0], "Arrays must have the same number of rows"
+        assert referencePoints_realWorld.shape[1] == 4, "Array must have exactly 4 columns"
+        assert np.all(referencePoints_realWorld[:, 3] == 1.0), "The fourth column must be 1"
 
-if __name__ == '__main__':
-    # 指定儲存 CSV 檔案的資料夾（請根據實際路徑修改）
-    csv_folder = os.path.join(BASE_DIR, 'pointclouds')
-    csv_files = sorted([os.path.join(csv_folder, f) for f in os.listdir(csv_folder) if f.endswith('.csv')])
-    
-    if len(csv_files) == 0:
-        print("找不到 CSV 檔案，請確認資料夾內有點雲 CSV 檔。")
-        exit(0)
+        reference_points_vectorPoints = self.pixelDepth2VectorPoint_array(referencePoints_pixelDepth)
 
-    # 讀取所有 CSV 並轉換成 Open3D 點雲
-    pcds = []
-    for csv_file in csv_files:
-        print(f"載入 {csv_file} ...")
-        pcd = load_csv_to_pcd(csv_file)
-        print(f"{csv_file} 點數: {np.asarray(pcd.points).shape[0]}")
-        pcds.append(pcd)
+        self.realWorldHomogene = np.column_stack((referencePoints_realWorld[:, 0:3], np.ones(referencePoints_realWorld.shape[0]).T)).T
+
+        vectorPoints_4D_with1 = np.ones(self.realWorldHomogene.shape)
+        for i, p in enumerate(reference_points_vectorPoints):
+            vectorPoints_4D_with1[0:3, i] = p
+
+        self.transformationMatrixImage2RealWorld = np.dot(self.realWorldHomogene, np.linalg.pinv(vectorPoints_4D_with1))
+        self.transformationMatrixRealWorld2Image = np.linalg.pinv(self.transformationMatrixImage2RealWorld)
+
+        print("ImageAndDepth2RealWorldTransformator initialized and calibrated")
+        print("transformationMatrixImage2RealWorld:\n", self.transformationMatrixImage2RealWorld)
+        print("transformationMatrixRealWorld2Image:\n", self.transformationMatrixRealWorld2Image)
+
+    def pixelDepth2VectorPoint(self, x, y, depth):
+        point_x, point_y, point_z = rs.rs2_deproject_pixel_to_point(self.intrinsics, [x, y], depth)
+        return np.array([point_x, point_y, point_z], dtype='float64')
+
+    def pixelDepth2VectorPoint_array(self, pixelDepthArray):
+        vectorPointsArray = []
+        for pixelDepth in pixelDepthArray:
+            vectorPointsArray.append(self.pixelDepth2VectorPoint(pixelDepth[0], pixelDepth[1], pixelDepth[2]))
+        return vectorPointsArray
+
+    def pixelDepth2RealWorld(self, x, y, depth):
+        test_x, test_y, test_z = x, y, depth
+        point_x, point_y, point_z = rs.rs2_deproject_pixel_to_point(self.intrinsics, [test_x, test_y], test_z)
+        point = np.array([point_x, point_y, point_z], dtype='float64')
+
+        vPoint = np.ones((1, 4))
+        vPoint[0, 0:3] = point
+        return np.dot(self.transformationMatrixImage2RealWorld, np.array(vPoint[0]))[0:3]
+
+
+# 開啟 .bag 檔案
+pipeline = rs.pipeline()
+config = rs.config()
+
+config.enable_device_from_file(bag_file)  # 用你的 .bag 檔案路徑
+pipeline.start(config)
+
+# 取得深度影像的內部參數
+profile = pipeline.get_active_profile()
+depth_profile = rs.video_stream_profile(profile.get_stream(rs.stream.depth))
+color_profile = rs.video_stream_profile(profile.get_stream(rs.stream.color))
+depth_intrinsics = depth_profile.get_intrinsics()
+color_intrinsics = color_profile.get_intrinsics()
+
+# 初始化變換器，並傳入相機內參和參考點
+imageAndDepth2RealWorldTransformator = ImageAndDepth2RealWorldTransformator(color_intrinsics, referencePoints_pixelDepth, referencePoints_realWorld)
+
+# 創建 Open3D 點雲物件
+point_cloud = o3d.geometry.PointCloud()
+
+# 用來儲存點雲的 NumPy 陣列
+points_list = []
+colors_list = []
+
+# 讀取 CSV 檔案並處理每一行
+for index, row in df.iterrows():
+    # 取得 CSV 中的 u, v, z (z*100)
+    u = row['u']
+    v = row['v']
+    z = row['z'] * 100  # 這裡乘以 100 是你提到的要求
+    R = row['R']
+    G = row['G']
+    B = row['B']
+
+    # 將每個點的 [u, v, z*100] 當作測試點
+    result = imageAndDepth2RealWorldTransformator.pixelDepth2RealWorld(u, v, z)
+    # print(f"Test: {u}, {v}, {z}")
+    # print("Result:", result)
+
+    # 設置每個點的顏色 (RGB)
+    color = np.array([B / 255.0, G / 255.0, R / 255.0])  # 顏色範圍 [0, 1], BGR -> RGB
     
-    # 配準並融合所有點雲，voxel_size 可根據資料密度調整
-    voxel_size = 0.02  # 例如 2 公分
-    merged_pcd = register_point_clouds(pcds, voxel_size)
-    
-    # 儲存最終融合的點雲 (ply 格式)
-    output_file = os.path.join(BASE_DIR, "world_coordinates.ply")
-    o3d.io.write_point_cloud(output_file, merged_pcd)
-    print(f"融合點雲已儲存為: {output_file}")
-    
-    # 選擇性地顯示結果
-    o3d.visualization.draw_geometries([merged_pcd])
+    # 將 3D 點和顏色分別加入列表中
+    points_list.append(result)
+    colors_list.append(color)
+
+# 將點和顏色轉換為 NumPy 陣列
+points_array = np.array(points_list)
+colors_array = np.array(colors_list)
+
+# 將點雲的點和顏色設置到 Open3D 點雲物件中
+point_cloud.points = o3d.utility.Vector3dVector(points_array)
+point_cloud.colors = o3d.utility.Vector3dVector(colors_array)
+
+# 顯示 3D 點雲
+o3d.visualization.draw_geometries([point_cloud])
+
+# 停止管道
+pipeline.stop()
