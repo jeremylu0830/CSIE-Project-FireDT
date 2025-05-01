@@ -27,14 +27,10 @@ def no_cap(base_dir: str, bag_file: str) -> dict:
     try:
         while True:
             frames = pipeline.wait_for_frames()
-            
             if not frames:
                 print("[INFO] No more frames available, exiting.")
                 break
-
             current_frame += 1
-            
-            # 如果不是中間幀，則跳過
             if current_frame < 220:
                 continue
 
