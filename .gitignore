@@ -1,8 +1,10 @@
-# 忽略所有的 .bag 檔案
 realsense/bags/*.bag
 realsense/pointclouds/*.csv
 realsense/projections/*.png
+realsense/projections/*.jpg
 material_segmentation/fds_output/*
+demo_web/uploads/*
+
 
 # 例外：保留所有 .fds 和 .smv 文件
 !material_segmentation/fds_output/*.fds
