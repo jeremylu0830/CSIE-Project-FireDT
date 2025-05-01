@@ -14,6 +14,7 @@ dependencies:
   - bzip2=1.0.8=h2466b09_7
   - ca-certificates=2025.1.31=h56e8100_0
   - cairo=1.18.4=h5782bbf_0
+  - certifi=2025.1.31=pyhd8ed1ab_0
   - colorama=0.4.6=pyhd8ed1ab_1
   - comm=0.2.2=pyhd8ed1ab_1
   - contourpy=1.3.1=py311h3257749_0
@@ -128,6 +129,7 @@ dependencies:
   - munkres=1.1.4=pyh9f0ad1d_0
   - nest-asyncio=1.6.0=pyhd8ed1ab_1
   - networkx=3.4.2=pyh267e887_2
+  - numpy=1.26.4=py311h0b4df5a_0
   - opencl-headers=2024.10.24=he0c23c2_0
   - opencv=4.11.0=qt6_py311h1822dc9_603
   - openexr=3.3.2=h3924f79_1
@@ -135,6 +137,7 @@ dependencies:
   - openjpeg=2.5.3=h4d64b90_0
   - openssl=3.4.1=ha4e3fda_0
   - packaging=24.2=pyhd8ed1ab_2
+  - pandas=2.2.3=py311hcf9f919_1
   - pango=1.56.3=h286b592_0
   - parso=0.8.4=pyhd8ed1ab_1
   - pcre2=10.44=h3d7b363_2
@@ -156,6 +159,7 @@ dependencies:
   - pyside6=6.8.2=py311h4238720_1
   - python=3.11.11=h3f84c4b_2_cpython
   - python-dateutil=2.9.0.post0=pyhff2d567_1
+  - python-tzdata=2025.2=pyhd8ed1ab_0
   - python_abi=3.11=5_cp311
   - pytorch=2.4.1=py3.11_cpu_0
   - pytorch-mutex=1.0=cpu
@@ -178,6 +182,7 @@ dependencies:
   - tornado=6.4.2=py311he736701_0
   - traitlets=5.14.3=pyhd8ed1ab_1
   - typing_extensions=4.12.2=pyha770c72_1
+  - tzdata=2025b=h78e105d_0
   - ucrt=10.0.22621.0=h57928b3_1
   - unicodedata2=16.0.0=py311he736701_0
   - vc=14.3=hbf610ac_24
@@ -196,34 +201,30 @@ dependencies:
   - pip:
       - attrs==25.3.0
       - blinker==1.9.0
-      - certifi==2025.1.31
-      - charset-normalizer==3.4.1
       - click==8.1.8
       - configargparse==1.7
       - dash==3.0.0
       - fastjsonschema==2.21.1
       - flask==3.0.3
-      - idna==3.10
       - ipywidgets==8.1.5
       - itsdangerous==2.2.0
+      - joblib==1.4.2
       - jsonschema==4.23.0
       - jsonschema-specifications==2024.10.1
       - jupyterlab-widgets==3.0.13
       - narwhals==1.31.0
       - nbformat==5.10.4
-      - numpy==2.1.2
       - open3d==0.19.0
-      - pandas==2.2.3
       - plotly==6.0.1
       - pyrealsense2==2.55.1.6486
       - pytz==2025.1
       - referencing==0.36.2
-      - requests==2.32.3
       - retrying==1.3.4
       - rpds-py==0.23.1
+      - scikit-learn==1.6.1
+      - scipy==1.15.2
       - stringcase==1.2.0
-      - tzdata==2025.2
-      - urllib3==2.3.0
+      - threadpoolctl==3.6.0
       - werkzeug==3.0.6
       - widgetsnbextension==4.0.13
 prefix: C:\Users\Marc\anaconda3\envs\crf2
