@@ -56,7 +56,7 @@ def run_pipeline(pic_input: str) -> dict:
         fds_local = r"C:\Program Files\firemodels\FDS6\bin\fds_local.bat"
         fds_dir = os.path.dirname(fds_input)
         shutil.copy2(fds_local, os.path.join(fds_dir, 'fds_local.bat'))
-        cmd = f'cd {fds_dir} && fds_local room_simulation.fds'
+        cmd = f'cd {fds_dir} && fds_local room_simulation.fds && smokeview room_simulation.smv'
         proc = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         if proc.returncode != 0:
             raise RuntimeError(proc.stderr)
