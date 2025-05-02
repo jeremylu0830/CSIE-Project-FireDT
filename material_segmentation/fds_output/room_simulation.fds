@@ -1,0 +1,82 @@
+&HEAD CHID='room_simulation', TITLE='Room with detected objects' /
+
+&TIME T_END=0.0 /
+
+&REAC ID='POLYURETHANE'
+      FUEL='REAC_FUEL'
+      C=6.3
+      H=7.1
+      O=2.1
+      N=1.0
+      SOOT_YIELD=0.10
+      HEAT_OF_COMBUSTION=24000.
+      IDEAL=.TRUE. /
+
+&MESH IJK=100,80,30, XB=0.0,10.0,0.0,8.0,0.0,3.0 /
+
+! Material surface definitions
+&SURF ID='FIRE'
+      HRRPUA=1000.
+      COLOR='RED' /
+
+&SURF ID='leather'
+      RGB=160,82,45
+      BACKING='VOID' /
+
+&SURF ID='metal'
+      RGB=192,192,192
+      BACKING='VOID' /
+
+&SURF ID='other'
+      RGB=128,128,128
+      BACKING='VOID' /
+
+! Object definitions
+! chair (Cluster 4)
+&OBST XB=7.389,7.889,-0.129,0.371,2.114,2.214, SURF_ID='leather' /
+
+&OBST XB=7.339,7.439,-0.179,-0.079,1.664,2.114, SURF_ID='metal' /
+&OBST XB=7.339,7.439,0.421,0.521,1.664,2.114, SURF_ID='metal' /
+&OBST XB=7.939,8.039,-0.179,-0.079,1.664,2.114, SURF_ID='metal' /
+&OBST XB=7.939,8.039,0.421,0.521,1.664,2.114, SURF_ID='metal' /
+
+&OBST XB=7.389,7.889,-0.229,-0.129,2.214,2.714, SURF_ID='leather' /
+
+! chair (Cluster 3)
+&OBST XB=8.253,8.753,0.144,0.644,1.973,2.073, SURF_ID='leather' /
+
+&OBST XB=8.203,8.303,0.094,0.194,1.523,1.973, SURF_ID='metal' /
+&OBST XB=8.203,8.303,0.694,0.794,1.523,1.973, SURF_ID='metal' /
+&OBST XB=8.803,8.903,0.094,0.194,1.523,1.973, SURF_ID='metal' /
+&OBST XB=8.803,8.903,0.694,0.794,1.523,1.973, SURF_ID='metal' /
+
+&OBST XB=8.253,8.753,0.044,0.144,2.073,2.573, SURF_ID='leather' /
+
+! chair (Cluster 1)
+&OBST XB=-0.151,0.349,7.146,7.646,0.262,0.362, SURF_ID='leather' /
+
+&OBST XB=-0.201,-0.101,7.096,7.196,-0.188,0.262, SURF_ID='metal' /
+&OBST XB=-0.201,-0.101,7.696,7.796,-0.188,0.262, SURF_ID='metal' /
+&OBST XB=0.399,0.499,7.096,7.196,-0.188,0.262, SURF_ID='metal' /
+&OBST XB=0.399,0.499,7.696,7.796,-0.188,0.262, SURF_ID='metal' /
+
+&OBST XB=-0.151,0.349,7.046,7.146,0.362,0.862, SURF_ID='leather' /
+
+! chair (Cluster 0)
+&OBST XB=4.979,5.479,3.992,4.492,1.500,1.600, SURF_ID='leather' /
+
+&OBST XB=4.929,5.029,3.942,4.042,1.050,1.500, SURF_ID='metal' /
+&OBST XB=4.929,5.029,4.542,4.642,1.050,1.500, SURF_ID='metal' /
+&OBST XB=5.529,5.629,3.942,4.042,1.050,1.500, SURF_ID='metal' /
+&OBST XB=5.529,5.629,4.542,4.642,1.050,1.500, SURF_ID='metal' /
+
+&OBST XB=4.979,5.479,3.892,3.992,1.600,2.100, SURF_ID='leather' /
+
+! keyboard (Cluster 2)
+&OBST XB=6.402,6.524,1.339,1.491,1.563,1.594, SURF_ID='other' /
+
+! Fire source
+&OBST XB=4.500,5.500,3.500,4.500,0.0,0.5, COLOR='RED', SURF_ID='FIRE' /
+&SLCF PBY=2, QUANTITY='TEMPERATURE' /
+
+&TAIL /
