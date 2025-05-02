@@ -6,6 +6,7 @@ material_segmentation/fds_output/*
 demo_web/uploads/*
 demo_web/*.bag
 *.pt
+**/__pycache__/*
 
 
 # 例外：保留所有 .fds 和 .smv 文件
