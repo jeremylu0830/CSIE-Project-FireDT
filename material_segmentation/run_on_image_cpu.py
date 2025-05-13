@@ -1,5 +1,4 @@
 #%%
-import glob
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
@@ -19,7 +18,7 @@ def color_image_w_masks(image, masks):
         mask = (masks == index).astype(np.uint8)
         if mask.sum() == 0:
             continue
-        color_palette = np.loadtxt(os.path.join(base_dir, 'palette.txt')).astype(np.uint8)
+        color_palette = np.loadtxt(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'palette.txt')).astype(np.uint8)
         color = color_palette[index]
         mask = np.expand_dims(mask, axis=-1)
         mask = np.repeat(mask, 3, axis=-1)
