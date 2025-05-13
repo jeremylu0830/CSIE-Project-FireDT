@@ -1,3 +1,15 @@
+const serverAddress = "https://tadpole-dashing-ape.ngrok-free.app";
+
+function showStatus(message, isError = false) {
+  const statusElement = document.getElementById('status');
+  statusElement.textContent = message;
+  if (isError) {
+      statusElement.style.color = 'red';
+  } else {
+      statusElement.style.color = 'green';
+  }
+}
+
 document.getElementById('uploadBtn').addEventListener('click', async () => {
     const fileInput = document.getElementById('fileInput');
     const files = fileInput.files;
