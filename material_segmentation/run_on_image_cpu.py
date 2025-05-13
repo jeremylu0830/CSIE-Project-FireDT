@@ -19,7 +19,7 @@ def color_image_w_masks(image, masks):
         mask = (masks == index).astype(np.uint8)
         if mask.sum() == 0:
             continue
-        color_palette = np.loadtxt('palette.txt').astype(np.uint8)
+        color_palette = np.loadtxt(os.path.join(base_dir, 'palette.txt')).astype(np.uint8)
         color = color_palette[index]
         mask = np.expand_dims(mask, axis=-1)
         mask = np.repeat(mask, 3, axis=-1)
@@ -166,18 +166,22 @@ def run_on_image_cpu(base_dir: str, img_num: str, img_path: str, point_path: str
 
     # ------- drawing -------
     plt.figure(figsize=(15, 15))
-    # plt.imshow(img[:, :, ::-1])
-
+    
+    # 使用color_image_w_masks函數將所有材質標籤合併到同一張圖上
+    colored_image = color_image_w_masks(img.copy(), labelmap)
+    plt.imshow(colored_image[:, :, ::-1])
+    plt.axis("off")
+    
+    # 添加圖例
+    legend_elements = []
     for i in range(23):
-        mask = labelmap == i
-        ax = plt.subplot(4, 6, i + 1)
-        ax.set_title(labels[i])
-        ax.imshow(img[:, :, ::-1])
-        ax.imshow(mask.astype(np.float32), alpha=0.5)
-        ax.axis("off")
-
+        color = np.loadtxt(os.path.join(base_dir, 'palette.txt')).astype(np.uint8)[i]
+        color = tuple(color / 255.0)  # 轉換為matplotlib可用的顏色格式
+        legend_elements.append(plt.Rectangle((0, 0), 1, 1, fc=color, label=labels[i]))
+    
+    plt.legend(handles=legend_elements, bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
     plt.tight_layout()
-    plt.savefig(os.path.join(base_dir, 'results', f"result_{img_num}.png"))
+    plt.savefig(os.path.join(base_dir, 'results', f"result_{img_num}.png"), bbox_inches='tight')
     np.savetxt(os.path.join(base_dir, 'labelmaps', f"test_{img_num}_labelmap.txt"), labelmap, fmt='%d')
 
     df['material'] = df.apply(lambda row: get_material(row, labelmap, labels), axis=1)
@@ -195,5 +199,6 @@ def run_on_image_cpu(base_dir: str, img_num: str, img_path: str, point_path: str
 if __name__ == "__main__":
     base_dir = os.path.dirname(os.path.abspath(__file__))
     img_num = '20250329_193301'
+    img_path = os.path.join(os.path.dirname(base_dir), 'realsense', 'projections', f'projection_{img_num}.jpg')
     point_path = os.path.join(base_dir, 'results', f'pointcloud_with_objects.csv')
-    run_on_image_cpu(base_dir, img_num, point_path)
+    run_on_image_cpu(base_dir, img_num, img_path, point_path)
