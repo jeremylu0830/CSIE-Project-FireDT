@@ -1,47 +1,62 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>檔案上傳範例</title>
-
-  <!--不請求icon-->
-  <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
-
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FDS Digital Twin Simulator</title>
+  <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 </head>
 <body>
-  <h1>上傳影片或照片</h1>
-  <input type="file" id="fileInput" multiple>
-  <button id="uploadBtn">上傳</button>
+  <div id="upload-container" class="container" style="display: none;">
+    <h1>Upload File</h1>
+    <input type="file" id="fileInput" name="files" multiple accept="image/*,video/*">
+    <button id="uploadBtn">Upload</button>
+    <div id="status"></div>
+  </div>
 
-  <script>
-    document.getElementById('uploadBtn').addEventListener('click', async () => {
-      const fileInput = document.getElementById('fileInput');
-      const files = fileInput.files;
-      if (!files.length) {
-        alert('請選擇至少一個檔案！');
-        return;
-      }
+  <div id="register-container" class="container" style="display: none;">
+    <h1>Register</h1>
+    <form id="registerForm" action="/register" method="post">
+      <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="Username" required>
+      </div>
+      <div class="form-group">
+        <label for="email_address">Email:</label>
+        <input type="email" id="email_address" name="Email" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="Password" required>
+      </div>
+      <button type="submit" id="registerBtn" class="full-width">Register</button>
+    </form>
+  </div>
 
-      // 將每個檔案透過 FormData 傳送給後端，欄位名稱改為 'files'
-      const formData = new FormData();
-      for (let i = 0; i < files.length; i++) {
-        formData.append('files', files[i]);
-      }
+  <div id="login-container" class="container" style="display: none;">
+    <h1>Login</h1>
+    <form id="loginForm" action="/login" method="post">
+      <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="Username" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="Password" required>
+      </div>
+      <button type="submit" id="loginBtn" class="full-width">Login</button>
+    </form>
+  </div>
 
-      try {
-        const response = await fetch('http://172.20.10.6:5000/api/upload', {
-          method: 'POST',
-          body: formData
-        });
-        const text = await response.text();
-        console.log('Raw response text:', text);
-        const result = JSON.parse(text);
-        alert(`上傳成功：${JSON.stringify(result)}`);
-      } catch (err) {
-        console.error(err);
-        alert('上傳時發生錯誤');
-      }
-    });
-  </script>
+  <div id="start-container" class="container">
+    <h1>FDS Digital Twin Simulator</h1>
+    <div class="button-container">
+      <button id="button-login" class="full-width" onclick="showLoginContainer()">Login</button><br>
+      <button id="button-register" class="full-width" onclick="showRegisterContainer()">Register</button>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 </body>
 </html>
