@@ -62,7 +62,6 @@ def generate_fds(input_json_path, static_json_path, output_fds_path):
             f.write(f"&SURF ID='{material}'\n")
             f.write(f"      RGB={rgb[0]},{rgb[1]},{rgb[2]}\n")
             f.write("      BACKING='VOID' /\n\n")
-
         f.write("! Object definitions\n")
         for obj in objects:
             bounds = obj['bounds']
@@ -114,6 +113,10 @@ def generate_fds(input_json_path, static_json_path, output_fds_path):
                         f"{z_center + seat_thick:.3f},{z_center + seat_thick + backrest_h:.3f}, "
                         f"SURF_ID='leather' /\n\n")
             else:
+                # 非椅子物件：根據 realsense 坐標轉換到 FDS 坐標系
+                # FDS XB: x：bounds['x_min']～bounds['x_max']
+                #       y：用 room 的 z 軸 → bounds['z_min']～bounds['z_max']
+                #       z：用 room 的 y 軸 → bounds['y_min']～bounds['y_max']
                 f.write(f"&OBST XB={bounds['x_min']:.3f},{bounds['x_max']:.3f},"
                         f"{bounds['z_min']:.3f},{bounds['z_max']:.3f},"
                         f"{bounds['y_min']:.3f},{bounds['y_max']:.3f}, "
