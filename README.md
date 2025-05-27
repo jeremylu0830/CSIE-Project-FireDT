@@ -63,10 +63,6 @@ This command run `app.py` in module mode, as other repositories were designed fo
 python -m demo_web.app
 ```
  
-Try to open web and type url `<your server IP>:5000` on your phone or other devices.
+Try to open web and type url `<your server IP>:5000` on your phone or other devices.s
 Then you will see a website!
-<<<<<<< HEAD
 **NOTE: two devices should connected to the SAME network.**
-=======
-**NOTE: two devices should connected to the SAME network.**
->>>>>>> upstream/master
