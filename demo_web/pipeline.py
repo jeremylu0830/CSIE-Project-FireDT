@@ -77,7 +77,10 @@ def test_fds_subprocess(pic_input: str) -> None:
     ssf_path = os.path.join(fds_dir, 'room_simulation.ssf')
     with open(ssf_path, 'w') as f:
         f.write('LOAD3DSMOKE\n')
-        f.write(' HRRPUV\n')
+        f.write(' TEMPERATURE\n')
+        # &SLCF PBY=2, QUANTITY='TEMPERATURE'
+        f.write('LOADSLCF\n')
+        f.write(' PBY=2, QUANTITY=TEMPERATURE\n')
         f.write('RENDERALL\n')
         f.write('1 0\n')
         f.write('room_simulation\n')
@@ -87,7 +90,7 @@ def test_fds_subprocess(pic_input: str) -> None:
         f.write('10\n')
 
     # 修改執行命令，加上 -script 執行腳本
-    cmd = f'cd {fds_dir}&& smokeview -runscript room_simulation'
+    cmd = f'cd {fds_dir}&& fds_local room_simulation.fds && smokeview -runscript room_simulation'
     subprocess.run(cmd, cwd=fds_dir, shell=True)
 
     # proc = subprocess.run(cmd, shell=True, capture_output=True, text=True)
