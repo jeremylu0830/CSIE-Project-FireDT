@@ -31,7 +31,7 @@ def no_cap(base_dir: str, bag_file: str) -> dict:
                 print("[INFO] No more frames available, exiting.")
                 break
             current_frame += 1
-            if current_frame < 220:
+            if current_frame < 320:
                 continue
 
             align = rs.align(rs.stream.color)
@@ -98,6 +98,6 @@ def no_cap(base_dir: str, bag_file: str) -> dict:
 # only for testing
 if __name__ == "__main__":
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    bag_file = os.path.join(base_dir, 'bags', '20250311_140524.bag')
+    bag_file = os.path.join(base_dir, 'bags', '20250311_141600.bag')
     print(bag_file)
     real_out = no_cap(base_dir, bag_file)
