@@ -25,6 +25,26 @@ def get_cluster_bounds(cluster_points):
 def build_obs_json(input_path: str, SPACE_X: float = 10.0, SPACE_Y: float = 3.0, SPACE_Z: float = 8.0) -> dict:
     df = pd.read_csv(input_path)
     
+    # 找出y值最低的前10%點，並取其中出現最多的材質
+    bottom_10_percent = df.nsmallest(int(len(df) * 0.1), 'y')
+    min_y_material = bottom_10_percent['material'].mode().iloc[0]
+    print(f"最低10%點的材質是: {min_y_material}")
+    
+    # 找出y值最高的前10%點，並取其中出現最多的材質
+    top_10_percent = df.nlargest(int(len(df) * 0.1), 'y')
+    max_y_material = top_10_percent['material'].mode().iloc[0]
+    print(f"最高10%點的材質是: {max_y_material}")
+    
+    # 找出z值最低的前10%點，並取其中出現最多的材質
+    bottom_z_10_percent = df.nsmallest(int(len(df) * 0.1), 'z')
+    min_z_material = bottom_z_10_percent['material'].mode().iloc[0]
+    print(f"最前10%點的材質是: {min_z_material}")
+    
+    # 找出z值最高的前10%點，並取其中出現最多的材質
+    top_z_10_percent = df.nlargest(int(len(df) * 0.1), 'z')
+    max_z_material = top_z_10_percent['material'].mode().iloc[0]
+    print(f"最後10%點的材質是: {max_z_material}")
+    
     # 計算縮放比例
     x_scale = SPACE_X / (df['x'].max() - df['x'].min())
     y_scale = SPACE_Y / (df['y'].max() - df['y'].min())
@@ -64,7 +84,7 @@ def build_obs_json(input_path: str, SPACE_X: float = 10.0, SPACE_Y: float = 3.0,
         
         output_data["objects"].append({
             "cluster_id": int(cluster_id),
-            "object_label": cluster_points['object_label'].iloc[0],
+            "object_label": cluster_points['object_label'].iloc[0] if pd.notna(cluster_points['object_label'].iloc[0]) else None,
             "material": {
                 "id": int(main_material_id),
                 "name": categories[int(main_material_id)]
@@ -87,5 +107,6 @@ def build_obs_json(input_path: str, SPACE_X: float = 10.0, SPACE_Y: float = 3.0,
 
 # only for testing
 if __name__ == "__main__":
-    input_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'results', 'clustered_points.csv')
+    img_num = '20250329_193301'
+    input_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'results', f'pointcloud_{img_num}_clustered.csv')
     build_obs_json(input_path)
