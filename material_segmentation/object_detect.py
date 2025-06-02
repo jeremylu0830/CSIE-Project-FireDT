@@ -5,7 +5,7 @@ import cv2
 import os
 from ultralytics import YOLO
 
-def detect_objects(csv_file: str, saved_path: str, model_path: str = "yolov8l.pt") -> dict:
+def detect_objects(csv_file: str, saved_path: str, model_path: str = "yolo11l.pt") -> dict:
     # ----------------- 重建圖片 -----------------
     df = pd.read_csv(csv_file)
     width, height = 640, 480
