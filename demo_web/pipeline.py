@@ -1,8 +1,7 @@
 # demo_web/pipeline.py
 import os, shutil, subprocess
-import sys
-import ctypes
 from realsense.no_cap import no_cap
+from realsense.coor_reconstruct import *
 from material_segmentation.object_detect import detect_objects
 from material_segmentation.run_on_image_cpu import run_on_image_cpu
 from material_segmentation.dbscan2 import dbscan_clustering
@@ -29,6 +28,7 @@ def run_pipeline(pic_input: str) -> dict:
         # 1. Realsense
         # bag_file = os.path.join(SENS_DIR, 'bags', '20250311_140524.bag')
         real_out = no_cap(SENS_DIR, bag_file)
+        world_coordinates(bag_file, real_out['pointcloud'])
         
         # 2. Object detection
         point_path = real_out['pointcloud']
@@ -96,6 +96,7 @@ def test_fds_subprocess(pic_input: str) -> None:
 
 # only for testing
 if __name__ == "__main__":
-    data_path = os.path.join(DEMO_DIR, '20250311_140524.bag')
+    # data_path = os.path.join(DEMO_DIR, '20250311_140524.bag')
+    data_path = os.path.join(DEMO_DIR, '20250311_141600.bag')
     # result = run_pipeline(pic_input=data_path)
-    test_fds_subprocess(data_path)
+    run_pipeline(data_path)
