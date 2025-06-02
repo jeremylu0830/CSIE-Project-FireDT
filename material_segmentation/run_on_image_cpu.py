@@ -24,7 +24,7 @@ def color_image_w_masks(image, masks):
         mask = np.repeat(mask, 3, axis=-1)
         mask = mask * np.array(color).reshape((-1, 3)) + (1 - mask) * image
         mask = mask.astype(np.uint8)
-        image = cv2.addWeighted(image, .5, mask, .5, 0)
+        image = cv2.addWeighted(image, .2, mask, .8, 0)
     return image
 
 def inference_on_whole_image(img, model):
@@ -198,5 +198,6 @@ def run_on_image_cpu(base_dir: str, img_num: str, img_path: str, point_path: str
 if __name__ == "__main__":
     base_dir = os.path.dirname(os.path.abspath(__file__))
     img_num = '20250329_193301'
-    img_path = os.path.join(os.path.dirname(base_dir), 'realsense', 'projections', f'projection_{img_num}.jpg')
+    img_path = os.path.join(os.path.dirname(base_dir), 'realsense', 'projections', f'projection_{img_num}.png')
+    point_path = os.path.join(base_dir, 'results', f'pointcloud_{img_num}_with_objects.csv')
     run_on_image_cpu(base_dir, img_num, img_path, point_path)
