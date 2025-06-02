@@ -2,12 +2,8 @@ import pyrealsense2 as rs
 import numpy as np
 import pandas as pd
 import os
-import open3d as o3d
+# import open3d as o3d
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-bag_file = os.path.join(BASE_DIR, 'bags', '20250311_140524.bag')
-csv_file = os.path.join(BASE_DIR, 'pointclouds', 'pointcloud_20250419_202146.csv')
-df = pd.read_csv(csv_file)
 referencePoints_pixelDepth = [
     [475, 83, 691],
     [958, 130, 638],
@@ -66,43 +62,63 @@ class ImageAndDepth2RealWorldTransformator:
         vPoint[0, 0:3] = point
         return np.dot(self.transformationMatrixImage2RealWorld, np.array(vPoint[0]))[0:3]
 
-pipeline = rs.pipeline()
-config = rs.config()
-config.enable_device_from_file(bag_file)
-pipeline.start(config)
+def world_coordinates(bag_file: str, csv_file: str, output_csv: str = None) -> str:
+    df = pd.read_csv(csv_file)
+    pipeline = rs.pipeline()
+    config = rs.config()
+    config.enable_device_from_file(bag_file)
+    pipeline.start(config)
 
-profile = pipeline.get_active_profile()
-depth_profile = rs.video_stream_profile(profile.get_stream(rs.stream.depth))
-color_profile = rs.video_stream_profile(profile.get_stream(rs.stream.color))
-depth_intrinsics = depth_profile.get_intrinsics()
-color_intrinsics = color_profile.get_intrinsics()
+    profile = pipeline.get_active_profile()
+    depth_profile = rs.video_stream_profile(profile.get_stream(rs.stream.depth))
+    color_profile = rs.video_stream_profile(profile.get_stream(rs.stream.color))
+    depth_intrinsics = depth_profile.get_intrinsics()
+    color_intrinsics = color_profile.get_intrinsics()
 
-imageAndDepth2RealWorldTransformator = ImageAndDepth2RealWorldTransformator(color_intrinsics, referencePoints_pixelDepth, referencePoints_realWorld)
+    imageAndDepth2RealWorldTransformator = ImageAndDepth2RealWorldTransformator(
+        color_intrinsics,
+        referencePoints_pixelDepth,
+        referencePoints_realWorld
+    )
 
-point_cloud = o3d.geometry.PointCloud()
+    world_points = []  # list of [X, Y, Z]
+    orig_colors  = []  # list of [R, G, B]
+    for index, row in df.iterrows():
+        u = row['u']
+        v = row['v']
+        z = row['z'] * 1000  # meter -> millimeter
+        R = row['R']
+        G = row['G']
+        B = row['B']
 
-points_list = []
-colors_list = []
-for index, row in df.iterrows():
-    u = row['u']
-    v = row['v']
-    z = row['z'] * 100
-    R = row['R']
-    G = row['G']
-    B = row['B']
+        # 把 (u, v, depth) 轉成世界座標 (X, Y, Z)
+        X, Y, Z = imageAndDepth2RealWorldTransformator.pixelDepth2RealWorld(u, v, z)
+        world_points.append([X, Y, Z])
+        orig_colors.append([R, G, B])
 
-    result = imageAndDepth2RealWorldTransformator.pixelDepth2RealWorld(u, v, z)
-    # print(f"Test: {u}, {v}, {z}")
-    # print("Result:", result)
+    pipeline.stop()
+    points_array = np.array(world_points)      # shape = (N, 3)
+    colors_array = np.array(orig_colors)       # shape = (N, 3)
 
-    color = np.array([B / 255.0, G / 255.0, R / 255.0])
-    points_list.append(result)
-    colors_list.append(color)
+    df_out = pd.DataFrame(points_array, columns=['x', 'y', 'z'])
+    df_out['u'] = df['u'].values
+    df_out['v'] = df['v'].values
+    df_out['R'] = colors_array[:, 0].astype(int)
+    df_out['G'] = colors_array[:, 1].astype(int)
+    df_out['B'] = colors_array[:, 2].astype(int)
 
-points_array = np.array(points_list)
-colors_array = np.array(colors_list)
-point_cloud.points = o3d.utility.Vector3dVector(points_array)
-point_cloud.colors = o3d.utility.Vector3dVector(colors_array)
-o3d.visualization.draw_geometries([point_cloud])
 
-pipeline.stop()
+    if output_csv is None:
+        # output_csv = os.path.join(os.path.dirname(csv_file), f'world_{os.path.basename(csv_file)}')
+        output_csv = csv_file
+    
+    df_out.to_csv(output_csv, index=False)
+    print(f"[INFO] 已將轉換後的世界座標與顏色存成：{output_csv}")
+    
+    return output_csv
+
+if __name__ == "__main__":
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    bag_file = os.path.join(BASE_DIR, 'bags', '20250311_141600.bag')
+    csv_file = os.path.join(BASE_DIR, 'pointclouds', 'pointcloud_20250329_193301.csv')
+    world_coordinates(bag_file, csv_file)
