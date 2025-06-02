@@ -199,5 +199,4 @@ if __name__ == "__main__":
     base_dir = os.path.dirname(os.path.abspath(__file__))
     img_num = '20250329_193301'
     img_path = os.path.join(os.path.dirname(base_dir), 'realsense', 'projections', f'projection_{img_num}.jpg')
-    point_path = os.path.join(base_dir, 'results', f'pointcloud_with_objects.csv')
     run_on_image_cpu(base_dir, img_num, img_path, point_path)
