@@ -58,6 +58,7 @@ def detect_objects(csv_file: str, saved_path: str, model_path: str = "yolo11l.pt
         df.loc[mask, "bbox_x2"] = round(x2, 2)
         df.loc[mask, "bbox_y2"] = round(y2, 2)
 
+    os.makedirs(os.path.join(saved_path, 'results'), exist_ok=True)
     output_file = os.path.join(saved_path, 'results', os.path.basename(csv_file).replace(".csv", "_with_objects.csv"))
     df.to_csv(output_file, index=False)
     print(f"更新後的 CSV 檔案已儲存為 {output_file}")
