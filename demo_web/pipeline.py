@@ -1,5 +1,5 @@
 # demo_web/pipeline.py
-import os, shutil, subprocess
+import os, shutil, subprocess, platform
 from realsense.no_cap import no_cap
 from realsense.coor_reconstruct import *
 from material_segmentation.object_detect import detect_objects
@@ -53,10 +53,18 @@ def run_pipeline(pic_input: str) -> dict:
         generate_fds(js_out['output_json'], static_json_file, fds_input)
         
         # 7. FDS init + 執行
-        fds_local = r"D:\CSIE_project\FDS\FDS6\bin\fds_local.bat"
-        fds_input = os.path.join(MATL_DIR, 'fds_output', 'room_simulation.fds')
-        fds_dir = os.path.dirname(fds_input)
-        shutil.copy2(fds_local, os.path.join(fds_dir, 'fds_local.bat'))
+        system = platform.system().lower()
+        fds_local, fds_dir = "", ""
+        if system == 'linux':
+            fds_local = r"/home/huaxin/FDS-SMV/bin/fds"
+            fds_dir = os.path.dirname(fds_input)
+            shutil.copy2(fds_local, os.path.join(fds_dir, 'fds_local.bat'))
+            cmd = f'cd {fds_dir}&& fds room_simulation.fds && smokeview -runscript room_simulation'
+        elif system == 'windows':
+            fds_local = r"D:\CSIE_project\FDS\FDS6\bin\fds_local.bat"
+            fds_dir = os.path.dirname(fds_input)
+            shutil.copy2(fds_local, os.path.join(fds_dir, 'fds'))
+            cmd = f'cd {fds_dir}&& fds_local room_simulation.fds && smokeview -runscript room_simulation'
         # 先建立自動化腳本 .ssf 檔案
         ssf_path = os.path.join(fds_dir, 'room_simulation.ssf')
         with open(ssf_path, 'w') as f:
@@ -74,7 +82,6 @@ def run_pipeline(pic_input: str) -> dict:
             f.write('10\n')
 
         # 修改執行命令，加上 -script 執行腳本
-        cmd = f'cd {fds_dir}&& fds_local room_simulation.fds && smokeview -runscript room_simulation'
         subprocess.run(cmd, cwd=fds_dir, shell=True)
 
         proc = subprocess.run(cmd, shell=True, capture_output=True, text=True)
@@ -109,7 +116,6 @@ def test_fds_subprocess(pic_input: str) -> None:
         f.write('10\n')
 
     # 修改執行命令，加上 -script 執行腳本
-    cmd = f'cd {fds_dir}&& fds_local room_simulation.fds && smokeview -runscript room_simulation'
     subprocess.run(cmd, cwd=fds_dir, shell=True)
 
     # proc = subprocess.run(cmd, shell=True, capture_output=True, text=True)
@@ -121,4 +127,4 @@ if __name__ == "__main__":
     # data_path = os.path.join(DEMO_DIR, '20250311_140524.bag')
     data_path = os.path.join(DEMO_DIR, '20250311_141600.bag')
     # result = run_pipeline(pic_input=data_path)
-    run_pipeline(data_path)
+    test_fds_subprocess(data_path)
