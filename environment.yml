@@ -1,4 +1,4 @@
-name: crf2-ultra
+name: fire-dt
 channels:
   - pytorch
   - http://conda.anaconda.org/gurobi
