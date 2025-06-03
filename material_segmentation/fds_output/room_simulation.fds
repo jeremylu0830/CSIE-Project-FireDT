@@ -1,6 +1,6 @@
 &HEAD CHID='room_simulation', TITLE='Room with detected objects' /
 
-&TIME T_END=1.0 /
+&TIME T_END=10.0 /
 
 &DUMP COLUMN_DUMP_LIMIT=.TRUE., DT_RESTART=100.0, DT_SL3D=0.25 /
 
