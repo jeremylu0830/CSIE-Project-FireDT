@@ -1,13 +1,21 @@
-from flask import render_template, request, redirect, url_for
+from flask import (
+    render_template, request, redirect, url_for,
+    send_file, abort
+)
 from demo_web import app, db
 from demo_web.models import User, File
 from demo_web.utils import save_uploaded_files
 from demo_web.pipeline import run_pipeline
-import os
+import os 
+import subprocess
+
+VIDEO_DIR = r"D:\CSIE_project\CSIE-Project-FireDT\material_segmentation\fds_output"
+AVI_PATH = os.path.join(VIDEO_DIR, "movie.avi")
+MP4_PATH = os.path.join(VIDEO_DIR, "movie.mp4")
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', video_url=None)
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -58,11 +66,40 @@ def upload_files():
     try:
         data_path = os.path.join(os.path.dirname(__file__), '20250311_140524.bag')
         result = run_pipeline(pic_input=data_path)
-        #result = run_pipeline(pic_input=saved_files[0])
+        if os.path.exists(AVI_PATH):
+        # 如果之前已經存在 MP4，就先刪掉，避免播放舊檔
+            if os.path.exists(MP4_PATH):
+                try:
+                    os.remove(MP4_PATH)
+                except OSError:
+                    pass
+            # Popen 會立刻返回，不會等轉檔結束
+            subprocess.Popen([
+                "ffmpeg",
+                "-y",  # 若 MP4 已存在，強制覆蓋
+                "-i", AVI_PATH,
+                "-c:v", "libx264",
+                "-c:a", "aac",
+                MP4_PATH
+            ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        else:
+            return redirect(url_for('error_page', msg=f"找不到影片檔：{AVI_PATH}"))
+    except subprocess.CalledProcessError as e:
+        return redirect(url_for('error_page', msg=f"轉檔失敗: {e}"))
     except Exception as e:
-        return redirect(url_for('error_page', msg=f'Pipeline 執行失敗: {e}'))
+        return redirect(url_for('error_page', msg=f'Pipeline 或轉檔執行失敗: {e}'))
 
-    return render_template('result.html', result=result)
+    # 上傳與轉檔完成後，讓前端去 /video 撈 MP4
+    return render_template('index.html', video_url=url_for('video'))
+
+@app.route('/video')
+def video():
+    # 先看 MP4 是否存在，若無則 404
+    if not os.path.exists(MP4_PATH):
+        return abort(404)
+    # 回傳 MP4，MIME type 要用 video/mp4
+    return send_file(MP4_PATH, mimetype='video/mp4')
+
 
 @app.route('/error')
 def error_page():
