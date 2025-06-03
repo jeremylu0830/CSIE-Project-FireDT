@@ -39,6 +39,9 @@ def run_pipeline(pic_input: str) -> dict:
         img_num = real_out['timestamp']
         img_path = real_out['projection']
         point_path = obj_out['object_csv']
+        print(f'[INFO] {img_num}')
+        print(f'[INFO] {img_path}')
+        print(f'[INFO] {obj_out}')
         seg_out = run_on_image_cpu(MATL_DIR, img_num, img_path, point_path)
         
         # 4. DBSCAN clustering
@@ -53,10 +56,29 @@ def run_pipeline(pic_input: str) -> dict:
         generate_fds(js_out['output_json'], static_json_file, fds_input)
         
         # 7. FDS init + 執行
-        fds_local = r"C:\Program Files\firemodels\FDS6\bin\fds_local.bat"
+        fds_local = r"D:\CSIE_project\FDS\FDS6\bin\fds_local.bat"
+        fds_input = os.path.join(MATL_DIR, 'fds_output', 'room_simulation.fds')
         fds_dir = os.path.dirname(fds_input)
         shutil.copy2(fds_local, os.path.join(fds_dir, 'fds_local.bat'))
-        cmd = f'cd {fds_dir} && fds_local room_simulation.fds && smokeview room_simulation.smv'
+        # 先建立自動化腳本 .ssf 檔案
+        ssf_path = os.path.join(fds_dir, 'room_simulation.ssf')
+        with open(ssf_path, 'w') as f:
+            f.write('LOAD3DSMOKE\n')
+            f.write(' TEMPERATURE\n')
+            # &SLCF PBY=2, QUANTITY='TEMPERATURE'
+            f.write('LOADSLCF\n')
+            f.write(' PBY=2, QUANTITY=TEMPERATURE\n')
+            f.write('RENDERALL\n')
+            f.write('1 0\n')
+            f.write('room_simulation\n')
+            f.write('MAKEMOVIE\n')
+            f.write('movie\n')
+            f.write('room_simulation\n')
+            f.write('10\n')
+
+        # 修改執行命令，加上 -script 執行腳本
+        cmd = f'cd {fds_dir}&& fds_local room_simulation.fds && smokeview -runscript room_simulation'
+        subprocess.run(cmd, cwd=fds_dir, shell=True)
 
         proc = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         if proc.returncode != 0:
@@ -69,7 +91,7 @@ def run_pipeline(pic_input: str) -> dict:
 
 def test_fds_subprocess(pic_input: str) -> None:
     # 7. FDS init + 執行
-    fds_local = r"C:\Program Files\firemodels\FDS6\bin\fds_local.bat"
+    fds_local = r"D:\CSIE_project\FDS\FDS6\bin\fds_local.bat"
     fds_input = os.path.join(MATL_DIR, 'fds_output', 'room_simulation.fds')
     fds_dir = os.path.dirname(fds_input)
     shutil.copy2(fds_local, os.path.join(fds_dir, 'fds_local.bat'))
@@ -99,7 +121,7 @@ def test_fds_subprocess(pic_input: str) -> None:
 
 # only for testing
 if __name__ == "__main__":
-    # data_path = os.path.join(DEMO_DIR, '20250311_140524.bag')
-    data_path = os.path.join(DEMO_DIR, '20250311_141600.bag')
+    data_path = os.path.join(DEMO_DIR, '20250311_140524.bag')
+    # data_path = os.path.join(DEMO_DIR, '20250311_141600.bag')
     # result = run_pipeline(pic_input=data_path)
     run_pipeline(data_path)
