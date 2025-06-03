@@ -1,107 +1,89 @@
 {
-    "version": "1.0.0",
-    "description": "Indoor Fire Simulator 靜態資料表，用於定義各物件在 FDS 中的生成模板與驗證規則。",
-    "object_templates": {
-      "chair": {
-        "comments": "單人座椅模板，包含椅座、椅背與椅腳",
-        "default_dimensions": {
-          "seat_width": {
-            "value": 0.5,
-            "unit": "m",
-            "comments": "標準椅座寬度"
+  "version": "1.0.0",
+  "description": "Indoor Fire Simulator 靜態資料表，用於定義各物件在 FDS 中的生成模板與驗證規則。",
+  "object_templates": {
+    "chair": {
+      "default_dimensions": {
+        "seat_width": 0.5,
+        "seat_half_width": 0.25,
+        "seat_depth": 0.5,
+        "seat_half_depth": 0.25,
+        "seat_height": 0.1,
+        "backrest_width": 0.5,
+        "backrest_half_width": 0.25,
+        "backrest_depth": 0.1,
+        "backrest_half_depth": 0.05,
+        "backrest_height": 0.5,
+        "leg_length": 0.45
+      },
+      "components": {
+        "seat": {
+          "position_offset": [0, 0, 0],
+          "dimensions": {
+            "width": 0.5,
+            "depth": 0.5,
+            "height": 0.1
           },
-          "seat_depth": {
-            "value": 0.5,
-            "unit": "m",
-            "comments": "標準椅座深度"
-          },
-          "seat_height": {
-            "value": 0.45,
-            "unit": "m",
-            "comments": "椅座厚度"
-          },
-          "backrest_height": {
-            "value": 0.5,
-            "unit": "m",
-            "comments": "椅背高度"
-          },
-          "leg_length": {
-            "value": 0.45,
-            "unit": "m",
-            "comments": "椅腳長度"
-          }
+          "FDS_template": "&OBST XB={{x_pos_min}},{{x_pos_max}},{{y_pos_min}},{{y_pos_max}},{{z_pos_min}},{{z_pos_max}}, SURF_ID='upholstery' /"
         },
-        "validation": {
-          "dimension_tolerance": 0.1,
-          "comments": "所有計算尺寸必須在預設尺寸上下 10% 範圍內"
+        "backrest": {
+          "position_offset": [0, -0.25, 0.1],
+          "dimensions": {
+            "width": 0.5,
+            "depth": 0.1,
+            "height": 0.5
+          },
+          "FDS_template": "&OBST XB={{x_pos_min}},{{x_pos_max}},{{y_pos_min}},{{y_pos_max}},{{z_pos_min}},{{z_pos_max}}, SURF_ID='upholstery' /"
         },
-        "material_options": {
-          "leather": {
-            "flammability": 0.2,
-            "color": "dark brown",
-            "FDS_params": "MATL_LEATHER",
-            "comments": "皮革材料對應的 FDS 材料參數"
+        "legs": {
+          "position_offsets": [
+            [-0.25, -0.25, 0],
+            [-0.25, 0.25, 0],
+            [0.25, -0.25, 0],
+            [0.25, 0.25, 0]
+          ],
+          "dimensions": {
+            "width": 0.1,
+            "depth": 0.1,
+            "height": -0.45
           },
-          "fabric": {
-            "flammability": 0.3,
-            "color": "gray",
-            "FDS_params": "MATL_FABRIC",
-            "comments": "布料材料對應的 FDS 材料參數"
-          }
+          "FDS_template": "&OBST XB={{x_pos_min}},{{x_pos_max}},{{y_pos_min}},{{y_pos_max}},{{z_pos_min}},{{z_pos_max}}, SURF_ID='metal' /"
+        }
+      }
+    },
+    "dining table": {
+      "default_dimensions": {
+        "top_length": 0.6,
+        "top_half_length": 0.3,
+        "top_width": 2.4,
+        "top_half_width": 1.2,
+        "top_height": 0.75
+      },
+      "components": {
+        "top": {
+          "position_offset": [0, 0, 0],
+          "dimensions": {
+            "width": 2.4,
+            "depth": 0.6,
+            "height": 0.05
+          },
+          "FDS_template": "&OBST XB={{x_pos_min}},{{x_pos_max}},{{y_pos_min}},{{y_pos_max}},{{z_pos_min}},{{z_pos_max}}, SURF_ID='plastic' /"
         },
-        "components": {
-          "seat": {
-            "position_offset": [0, 0, 0],
-            "dimensions": {
-              "width": "default_dimensions.seat_width.value",
-              "depth": "default_dimensions.seat_depth.value",
-              "height": "default_dimensions.seat_height.value"
-            },
-            "FDS_template": "OBST SEAT {{x_pos}}, {{y_pos}}, {{z_pos}} DIMENSIONS {{width}}, {{depth}}, {{height}} MATL {{material}}",
-            "rules": {
-              "x_pos": "base_point[0]",
-              "y_pos": "base_point[1]",
-              "z_pos": "base_point[2]"
-            },
-            "comments": "椅座部分，根據中點位置生成"
+        "legs": {
+          "position_offsets": [
+            [-1.15, -0.25, 0],
+            [-1.15, 0.25, 0],
+            [1.15, -0.25, 0],
+            [1.15, 0.25, 0]
+          ],
+          "dimensions": {
+            "width": 0.05,
+            "depth": 0.05,
+            "height": -0.70
           },
-          "backrest": {
-            "position_offset": [0, -0.25, "default_dimensions.seat_height.value"],
-            "dimensions": {
-              "width": "default_dimensions.seat_width.value",
-              "thickness": 0.1,
-              "height": "default_dimensions.backrest_height.value"
-            },
-            "FDS_template": "OBST BACKREST {{x_pos}}, {{y_pos}}, {{z_pos}} DIMENSIONS {{width}}, {{thickness}}, {{height}} MATL {{material}}",
-            "rules": {
-              "x_pos": "base_point[0]",
-              "y_pos": "base_point[1] + position_offset[1]",
-              "z_pos": "base_point[2] + position_offset[2]"
-            },
-            "comments": "椅背部分，向後偏移 0.25 m"
-          },
-          "legs": {
-            "position_offsets": [
-              [0.2, 0.2, -0.5],
-              [-0.2, 0.2, -0.5],
-              [0.2, -0.2, -0.5],
-              [-0.2, -0.2, -0.5]
-            ],
-            "dimensions": {
-              "width": 0.1,
-              "depth": 0.1,
-              "height": "default_dimensions.leg_length.value"
-            },
-            "FDS_template": "OBST LEG_{{index}} {{x_pos}}, {{y_pos}}, {{z_pos}} DIMENSIONS {{width}}, {{depth}}, {{height}} MATL {{material}}",
-            "rules": {
-              "x_pos": "base_point[0] + offset[0]",
-              "y_pos": "base_point[1] + offset[1]",
-              "z_pos": "base_point[2] + offset[2]"
-            },
-            "comments": "四隻椅腳，每個位置根據各自偏移進行計算"
-          }
+          "FDS_template": "&OBST XB={{x_pos_min}},{{x_pos_max}},{{y_pos_min}},{{y_pos_max}},{{z_pos_min}},{{z_pos_max}}, SURF_ID='wood' /"
         }
       }
     }
   }
-  
+}

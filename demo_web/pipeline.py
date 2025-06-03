@@ -1,8 +1,7 @@
 # demo_web/pipeline.py
 import os, shutil, subprocess
-import sys
-import ctypes
 from realsense.no_cap import no_cap
+from realsense.coor_reconstruct import *
 from material_segmentation.object_detect import detect_objects
 from material_segmentation.run_on_image_cpu import run_on_image_cpu
 from material_segmentation.dbscan2 import dbscan_clustering
@@ -29,6 +28,7 @@ def run_pipeline(pic_input: str) -> dict:
         # 1. Realsense
         # bag_file = os.path.join(SENS_DIR, 'bags', '20250311_140524.bag')
         real_out = no_cap(SENS_DIR, bag_file)
+        world_coordinates(bag_file, real_out['pointcloud'])
         
         # 2. Object detection
         point_path = real_out['pointcloud']
@@ -77,7 +77,10 @@ def test_fds_subprocess(pic_input: str) -> None:
     ssf_path = os.path.join(fds_dir, 'room_simulation.ssf')
     with open(ssf_path, 'w') as f:
         f.write('LOAD3DSMOKE\n')
-        f.write(' HRRPUV\n')
+        f.write(' TEMPERATURE\n')
+        # &SLCF PBY=2, QUANTITY='TEMPERATURE'
+        f.write('LOADSLCF\n')
+        f.write(' PBY=2, QUANTITY=TEMPERATURE\n')
         f.write('RENDERALL\n')
         f.write('1 0\n')
         f.write('room_simulation\n')
@@ -87,7 +90,7 @@ def test_fds_subprocess(pic_input: str) -> None:
         f.write('10\n')
 
     # 修改執行命令，加上 -script 執行腳本
-    cmd = f'cd {fds_dir}&& smokeview -runscript room_simulation'
+    cmd = f'cd {fds_dir}&& fds_local room_simulation.fds && smokeview -runscript room_simulation'
     subprocess.run(cmd, cwd=fds_dir, shell=True)
 
     # proc = subprocess.run(cmd, shell=True, capture_output=True, text=True)
@@ -96,6 +99,7 @@ def test_fds_subprocess(pic_input: str) -> None:
 
 # only for testing
 if __name__ == "__main__":
-    data_path = os.path.join(DEMO_DIR, '20250311_140524.bag')
+    # data_path = os.path.join(DEMO_DIR, '20250311_140524.bag')
+    data_path = os.path.join(DEMO_DIR, '20250311_141600.bag')
     # result = run_pipeline(pic_input=data_path)
-    test_fds_subprocess(data_path)
+    run_pipeline(data_path)

@@ -1,8 +1,4 @@
 #%%
-<<<<<<< HEAD
-import glob
-=======
->>>>>>> upstream/master
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
@@ -22,17 +18,13 @@ def color_image_w_masks(image, masks):
         mask = (masks == index).astype(np.uint8)
         if mask.sum() == 0:
             continue
-<<<<<<< HEAD
-        color_palette = np.loadtxt('palette.txt').astype(np.uint8)
-=======
         color_palette = np.loadtxt(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'palette.txt')).astype(np.uint8)
->>>>>>> upstream/master
         color = color_palette[index]
         mask = np.expand_dims(mask, axis=-1)
         mask = np.repeat(mask, 3, axis=-1)
         mask = mask * np.array(color).reshape((-1, 3)) + (1 - mask) * image
         mask = mask.astype(np.uint8)
-        image = cv2.addWeighted(image, .5, mask, .5, 0)
+        image = cv2.addWeighted(image, .2, mask, .8, 0)
     return image
 
 def inference_on_whole_image(img, model):
@@ -173,20 +165,6 @@ def run_on_image_cpu(base_dir: str, img_num: str, img_path: str, point_path: str
 
     # ------- drawing -------
     plt.figure(figsize=(15, 15))
-<<<<<<< HEAD
-    # plt.imshow(img[:, :, ::-1])
-
-    for i in range(23):
-        mask = labelmap == i
-        ax = plt.subplot(4, 6, i + 1)
-        ax.set_title(labels[i])
-        ax.imshow(img[:, :, ::-1])
-        ax.imshow(mask.astype(np.float32), alpha=0.5)
-        ax.axis("off")
-
-    plt.tight_layout()
-    plt.savefig(os.path.join(base_dir, 'results', f"result_{img_num}.png"))
-=======
     
     # 使用color_image_w_masks函數將所有材質標籤合併到同一張圖上
     colored_image = color_image_w_masks(img.copy(), labelmap)
@@ -203,7 +181,6 @@ def run_on_image_cpu(base_dir: str, img_num: str, img_path: str, point_path: str
     plt.legend(handles=legend_elements, bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
     plt.tight_layout()
     plt.savefig(os.path.join(base_dir, 'results', f"result_{img_num}.png"), bbox_inches='tight')
->>>>>>> upstream/master
     np.savetxt(os.path.join(base_dir, 'labelmaps', f"test_{img_num}_labelmap.txt"), labelmap, fmt='%d')
 
     df['material'] = df.apply(lambda row: get_material(row, labelmap, labels), axis=1)
@@ -221,11 +198,6 @@ def run_on_image_cpu(base_dir: str, img_num: str, img_path: str, point_path: str
 if __name__ == "__main__":
     base_dir = os.path.dirname(os.path.abspath(__file__))
     img_num = '20250329_193301'
-<<<<<<< HEAD
-    point_path = os.path.join(base_dir, 'results', f'pointcloud_with_objects.csv')
-    run_on_image_cpu(base_dir, img_num, point_path)
-=======
-    img_path = os.path.join(os.path.dirname(base_dir), 'realsense', 'projections', f'projection_{img_num}.jpg')
-    point_path = os.path.join(base_dir, 'results', f'pointcloud_with_objects.csv')
+    img_path = os.path.join(os.path.dirname(base_dir), 'realsense', 'projections', f'projection_{img_num}.png')
+    point_path = os.path.join(base_dir, 'results', f'pointcloud_{img_num}_with_objects.csv')
     run_on_image_cpu(base_dir, img_num, img_path, point_path)
->>>>>>> upstream/master
