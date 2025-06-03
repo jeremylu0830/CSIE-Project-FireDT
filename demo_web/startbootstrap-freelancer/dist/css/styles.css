@@ -42,18 +42,16 @@
   --bs-danger: #dc3545;
   --bs-light: #f8f9fa;
   --bs-dark: #212529;
-  --bs-primary-rgb: 26, 188, 156;
-  --bs-secondary-rgb: 44, 62, 80;
-  --bs-success-rgb: 25, 135, 84;
-  --bs-info-rgb: 13, 202, 240;
-  --bs-warning-rgb: 255, 193, 7;
-  --bs-danger-rgb: 220, 53, 69;
-  --bs-light-rgb: 248, 249, 250;
-  --bs-dark-rgb: 33, 37, 41;
-  --bs-white-rgb: 255, 255, 255;
-  --bs-black-rgb: 0, 0, 0;
-  --bs-body-color-rgb: 33, 37, 41;
-  --bs-body-bg-rgb: 255, 255, 255;
+  --bs-primary: #df7676; /* 警戒紅，Logo 及主要按鈕使用 */
+  --bs-secondary: #263238; /* 深藍，導覽列底色 */
+  --bs-success: #388E3C; /* 安全綠，可用於成功提示 */
+  --bs-info: #0288D1; /* 輔助藍，用於按鈕或標籤 */
+  --bs-warning: #F9A825; /* 警示黃，可用於提示區塊 */
+  --bs-danger: #C62828; /* 深紅（可作為強烈警告色） */
+  --bs-light: #FAFAFA; /* 背景淺色 */
+  --bs-dark: #212121; /* 通用深灰色字體 */
+  --bs-body-color: #212121; /* 主體文字色 */
+  --bs-body-bg: #FFFDE7; /* 背景用柔和淡黃，營造警覺氛圍 */
   --bs-font-sans-serif: "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --bs-font-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
@@ -65,7 +63,7 @@
   --bs-body-bg: #fff;
   --bs-border-width: 0.125rem;
   --bs-border-style: solid;
-  --bs-border-color: #dee2e6;
+  --bs-border-color: #e0e0e0; /*有換*/
   --bs-border-color-translucent: rgba(0, 0, 0, 0.175);
   --bs-border-radius: 0.5rem;
   --bs-border-radius-sm: 0.25rem;
@@ -73,10 +71,20 @@
   --bs-border-radius-xl: 1rem;
   --bs-border-radius-2xl: 2rem;
   --bs-border-radius-pill: 50rem;
-  --bs-link-color: #1abc9c;
-  --bs-link-hover-color: #15967d;
+  --bs-link-color: #D32F2F; /*這兩行有換*/
+  --bs-link-hover-color: #B71C1C;
   --bs-code-color: #d63384;
-  --bs-highlight-bg: #fff3cd;
+    --bs-highlight-bg: #FFF3CD; /* 顯眼提示背景 */
+
+      /* 更新原始 primary RGB */
+  --bs-primary-rgb: 223, 118, 118;
+  --bs-secondary-rgb: 38, 50, 56;
+  --bs-success-rgb: 56, 142, 60;
+  --bs-info-rgb: 2, 136, 209;
+  --bs-warning-rgb: 249, 168, 37;
+  --bs-danger-rgb: 198, 40, 40;
+  --bs-light-rgb: 250, 250, 250;
+  --bs-dark-rgb: 33, 33, 33;
 }
 
 *,
@@ -11043,4 +11051,48 @@ html {
 
 .copyright {
   background-color: #1a252f;
+}
+
+.animated-fire {
+  color: #feffff; /* 橘紅色 */
+  animation: flicker 1s infinite ease-in-out;
+  text-shadow:
+    0 0 5px #ff6f00,
+    0 0 10px #ff6f00,
+    0 0 20px #ff8f00,
+    0 0 30px #ffca28;
+}
+
+/* 火焰抖動 + 強弱變化 */
+@keyframes flicker {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+    text-shadow: 0 0 10px #ff6f00;
+  }
+  20% {
+    transform: scale(1.08) rotate(-3deg);
+    opacity: 0.8;
+    text-shadow: 0 0 25px #ff9100;
+  }
+  40% {
+    transform: scale(1.12) rotate(3deg);
+    opacity: 1;
+    text-shadow: 0 0 30px #ff6f00;
+  }
+  60% {
+    transform: scale(1.1) rotate(-2deg);
+    opacity: 0.75;
+    text-shadow: 0 0 35px #ff6f00;
+  }
+  80% {
+    transform: scale(1.05) rotate(2deg);
+    opacity: 0.95;
+    text-shadow: 0 0 40px #ff8f00;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+    text-shadow: 0 0 10px #ff6f00;
+  }
 }
