@@ -55,15 +55,15 @@
       "default_dimensions": {
         "top_length": 0.6,
         "top_half_length": 0.3,
-        "top_width": 2.4,
-        "top_half_width": 1.2,
+        "top_width": 1.2,
+        "top_half_width": 0.6,
         "top_height": 0.75
       },
       "components": {
         "top": {
           "position_offset": [0, 0, 0],
           "dimensions": {
-            "width": 2.4,
+            "width": 1.2,
             "depth": 0.6,
             "height": 0.05
           },
@@ -71,10 +71,10 @@
         },
         "legs": {
           "position_offsets": [
-            [-1.15, -0.25, 0],
-            [-1.15, 0.25, 0],
-            [1.15, -0.25, 0],
-            [1.15, 0.25, 0]
+            [-0.55, -0.25, 0],
+            [-0.55, 0.25, 0],
+            [0.55, -0.25, 0],
+            [0.55, 0.25, 0]
           ],
           "dimensions": {
             "width": 0.05,
