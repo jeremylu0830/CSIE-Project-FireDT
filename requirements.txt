@@ -1,5 +1,4 @@
 # requirements.txt - FireDT cross-platform dependencies
-python==3.11
 flask==3.0.3
 flask-login==0.6.3
 flask-sqlalchemy==3.1.1
@@ -13,7 +12,6 @@ scipy==1.15.2
 seaborn==0.13.2
 SQLAlchemy==2.0.40
 stringcase==1.2.0
-pydensecrf==1.0rc3
 torch==2.7.0
 torchvision==0.22.0
 ultralytics==8.3.118

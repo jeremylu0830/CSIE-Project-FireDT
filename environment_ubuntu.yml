@@ -1,0 +1,24 @@
+name: fire-dt
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.10
+
+  # 安裝必備的系統工具／函式庫（conda-forge 上能找到的部分）
+  - cmake
+  - gcc
+  - eigen
+  - libusb
+  - mesa
+  - glib
+  - pip
+
+  # 把 pip 套件寫在這兒（相當於 Dockerfile 的 pip install -r requirements.txt）
+  - pip:
+    # 讀取你現有的 requirements.txt 裡面列的所有 Python 套件
+    - -r requirements.txt
+
+    # 再單獨安裝那支 GitHub 版的 pydensecrf
+    - git+https://github.com/lucasb-eyer/pydensecrf.git
