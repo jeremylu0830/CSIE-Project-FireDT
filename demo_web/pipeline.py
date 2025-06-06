@@ -39,6 +39,9 @@ def run_pipeline(pic_input: str) -> dict:
         img_num = real_out['timestamp']
         img_path = real_out['projection']
         point_path = obj_out['object_csv']
+        print(f'[INFO] {img_num}')
+        print(f'[INFO] {img_path}')
+        print(f'[INFO] {obj_out}')
         seg_out = run_on_image_cpu(MATL_DIR, img_num, img_path, point_path)
         
         # 4. DBSCAN clustering
