@@ -1,11 +1,12 @@
 from flask import (
     render_template, request, redirect, url_for,
-    send_file, abort
+    send_file, abort, flash
 )
 from demo_web import app, db
 from demo_web.models import User, File
 from demo_web.utils import save_uploaded_files
 from demo_web.pipeline import run_pipeline
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 import os 
 import subprocess
 
@@ -13,26 +14,40 @@ VIDEO_DIR = r"D:\CSIE_project\CSIE-Project-FireDT\material_segmentation\fds_outp
 AVI_PATH = os.path.join(VIDEO_DIR, "movie.avi")
 MP4_PATH = os.path.join(VIDEO_DIR, "movie.mp4")
 
-@app.route('/')
+# @app.route('/')
+# def index():
+#     return render_template('index.html', video_url=None)
+
+
+@app.route('/', methods=['GET'])
 def index():
     return render_template('index.html', video_url=None)
 
 @app.route('/login', methods=['POST'])
 def login():
-    username = request.form['Username']
-    password = request.form['Password']
+    username = request.form.get('username', '').strip()
+    password = request.form.get('password', '')
     
-    """
-    TODO: check if login successfully
-    """
+    # 2. 查詢資料庫，看有沒有這個 username
+    user = User.query.filter_by(username=username).first()
+
+    # 3. 如果找不到 user，或是密碼比對失敗
+    if user is None or not user.check_password(password):
+        # 3.1 你可以用 flash() 顯示錯誤訊息，也可以直接 redirect 到錯誤頁
+        flash('帳號或密碼錯誤，請重新嘗試。', 'danger')
+        return redirect('/login')
     
-    return redirect('/')
+    # 4. 代表帳號存在且密碼正確，呼叫 login_user 將使用者登入
+    login_user(user)
+    
+    return render_template('member.html', user=user)
 
 @app.route('/register', methods=['POST'])
 def register():
-    username = request.form['Username']
-    email    = request.form['Email']
-    password = request.form['Password']
+    username = request.form.get('username', '').strip()
+    email    = request.form.get('email', '').strip()
+    password = request.form.get('password', '')
+
     
     existing_user = User.query.filter_by(username=username).first()
     if existing_user:
@@ -49,6 +64,15 @@ def register():
     db.session.commit()
     
     return redirect('/')
+    
+
+@app.route('/login', methods=['GET'])
+def show_login():
+    return render_template('login.html')
+
+@app.route('/register', methods=['GET'])
+def show_register():
+    return render_template('register.html')
 
 @app.route('/api/upload', methods=['POST'])
 def upload_files():
