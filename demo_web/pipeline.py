@@ -1,5 +1,5 @@
 # demo_web/pipeline.py
-import os, shutil, subprocess, platform
+import os, shutil, subprocess, platform, time
 from realsense.no_cap import no_cap
 from realsense.coor_reconstruct import *
 from material_segmentation.object_detect import detect_objects
@@ -9,9 +9,10 @@ from material_segmentation.build_obs import build_obs_json
 from material_segmentation.fds import generate_fds
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DEMO_DIR = os.path.dirname(os.path.abspath(__file__))
+DEMO_DIR = os.path.join(BASE_DIR, 'demo_web')
 MATL_DIR = os.path.join(BASE_DIR, 'material_segmentation')
 SENS_DIR = os.path.join(BASE_DIR, 'realsense')
+FILE_DIR = os.path.join(DEMO_DIR, 'results')
 
 def run_media_bat():
     bat = os.path.join(DEMO_DIR, 'process_media.bat')
@@ -22,33 +23,34 @@ def run_media_bat():
 
 
 def run_pipeline(pic_input: str) -> dict:
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
+    os.makedirs(FILE_DIR, exist_ok=True)
+    os.makedirs(os.path.join(FILE_DIR, timestamp), exist_ok=True)
+    out_dir = os.path.join(FILE_DIR, timestamp)
     if pic_input.endswith('.bag'):
         bag_file = pic_input
     try:
         # 1. Realsense
-        # bag_file = os.path.join(SENS_DIR, 'bags', '20250311_140524.bag')
-        real_out = no_cap(SENS_DIR, bag_file)
+        real_out = no_cap(bag_file, out_dir)
         world_coordinates(bag_file, real_out['pointcloud'])
         
         # 2. Object detection
         point_path = real_out['pointcloud']
-        saved_path = os.path.join(BASE_DIR, 'material_segmentation')
-        obj_out = detect_objects(point_path, saved_path)
+        obj_out = detect_objects(point_path, out_dir)
         
         # 3. Material segmentation
-        img_num = real_out['timestamp']
         img_path = real_out['projection']
         point_path = obj_out['object_csv']
-        print(f'[INFO] {img_num}')
+        print(f'[INFO] {timestamp}')
         print(f'[INFO] {img_path}')
-        print(f'[INFO] {obj_out}')
-        seg_out = run_on_image_cpu(MATL_DIR, img_num, img_path, point_path)
+        print(f'[INFO] {point_path}')
+        seg_out = run_on_image_cpu(img_path, point_path, out_dir)
         
         # 4. DBSCAN clustering
-        db_out = dbscan_clustering(seg_out['output_csv'], img_num)
+        db_out = dbscan_clustering(seg_out['output_csv'], out_dir)
         
         # 5. build obstacle json file
-        js_out = build_obs_json(db_out['cluster_path'])
+        js_out = build_obs_json(db_out['cluster_path'], out_dir)
         
         # 6. write fds file
         static_json_file = os.path.join(MATL_DIR, 'static.json')
@@ -65,6 +67,7 @@ def run_pipeline(pic_input: str) -> dict:
             cmd = f'cd {fds_dir}&& fds room_simulation.fds && smokeview -runscript room_simulation'
         elif system == 'windows':
             fds_local = r"D:\CSIE_project\FDS\FDS6\bin\fds_local.bat"
+            fds_local = r"C:\Program Files\firemodels\FDS6\bin\fds_local.bat"
             fds_dir = os.path.dirname(fds_input)
             shutil.copy2(fds_local, os.path.join(fds_dir, 'fds'))
             cmd = f'cd {fds_dir}&& fds_local room_simulation.fds && smokeview -runscript room_simulation'
@@ -220,8 +223,8 @@ def test_votenet(csv_path):
 # only for testing
 if __name__ == "__main__":
     # # data_path = os.path.join(DEMO_DIR, '20250311_140524.bag')
-    # data_path = os.path.join(DEMO_DIR, '20250311_141600.bag')
+    data_path = os.path.join(DEMO_DIR, '20250311_141600.bag')
     # # result = run_pipeline(pic_input=data_path)
-    # run_pipeline(data_path)
+    run_pipeline(data_path)
 
-    test_votenet(os.path.join(MATL_DIR, 'results', 'pointcloud_20250329_193301_with_objects.csv'))
+    # test_votenet(os.path.join(MATL_DIR, 'results', 'pointcloud_20250329_193301_with_objects.csv'))

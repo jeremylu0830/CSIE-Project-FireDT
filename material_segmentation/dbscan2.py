@@ -3,10 +3,13 @@ import numpy as np
 import json
 import os
 
-def dbscan_clustering(
-    input_csv: str,
-    img_num: str = None
-) -> dict:
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DEMO_DIR = os.path.join(BASE_DIR, 'demo_web')
+MATL_DIR = os.path.join(BASE_DIR, 'material_segmentation')
+SENS_DIR = os.path.join(BASE_DIR, 'realsense')
+FILE_DIR = os.path.join(DEMO_DIR, 'results')
+
+def dbscan_clustering(input_csv: str, out_dir: str = None) -> dict:
     """
     讀入一個包含欄位 [x, y, z, material, object_num, ...] 的 CSV 檔，
     對於每一個 object_num：
@@ -101,23 +104,17 @@ def dbscan_clustering(
         })
 
     # 輸出更新後的 CSV
-    output_path = os.path.join(
-        os.path.dirname(input_csv),
-        f'pointcloud_{img_num}_clustered.csv'
-    )
+    output_path = os.path.join(out_dir, f'pointcloud_clustered.csv')
     df.to_csv(output_path, index=False)
 
     return {
         'cluster_path': output_path
     }
 
-    return output_data
-
-
 # -------------------------
 # 範例使用方式
 # -------------------------
 if __name__ == "__main__":
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    data_path = os.path.join(base_dir, 'results', 'pointcloud_20250329_193301_with_materials.csv')
-    result = dbscan_clustering(data_path, '20250329_193301')
+    img_num = '20250329_193301'
+    data_path = os.path.join(FILE_DIR, f'pointcloud_{img_num}_with_materials.csv')
+    result = dbscan_clustering(data_path, img_num)

@@ -43,7 +43,7 @@ def is_xz_overlap(box1, box2):
 # ------------------------------------------------
 # 3) 實作 Bottom‐Left 貪婪填充法 (Greedy Fill)
 # ------------------------------------------------
-def build_obs_json(input_path: str, SPACE_X: float = 10.0, SPACE_Y: float = 3.0, SPACE_Z: float = 8.0) -> dict:
+def build_obs_json(input_path: str, out_dir: str, SPACE_X: float = 10.0, SPACE_Y: float = 3.0, SPACE_Z: float = 8.0) -> dict:
     # --- 讀取原始 CSV（已含歸一化後的 x,y,z, material, object_num, object_label）---
     df = pd.read_csv(input_path)
 
@@ -212,7 +212,7 @@ def build_obs_json(input_path: str, SPACE_X: float = 10.0, SPACE_Y: float = 3.0,
             print(f"⚠️ Object {info['object_num']} 無法在 (0~{SPACE_X})×(0~{SPACE_Z}) 空間內擺放；已略過")
 
     # --- 將結果寫到 room_simulation.json ---
-    output_path = os.path.join(os.path.dirname(os.path.dirname(input_path)), "room_simulation.json")
+    output_path = os.path.join(out_dir, "room_simulation.json")
     with open(output_path, "w") as f:
         json.dump(output_data, f, indent=4)
 
@@ -224,7 +224,7 @@ def build_obs_json(input_path: str, SPACE_X: float = 10.0, SPACE_Y: float = 3.0,
 # 若你希望直接執行此檔做測試，可使用下面區塊
 # --------------------------------------------
 if __name__ == "__main__":
-    img_num    = '20250329_193301'
     input_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                              'results', f'pointcloud_{img_num}_clustered.csv')
+                              'results', f'pointcloud_clustered.csv')
+    out_dir = os.path.dirname(input_path)
     build_obs_json(input_path)

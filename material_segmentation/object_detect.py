@@ -5,6 +5,12 @@ import cv2
 import os
 from ultralytics import YOLO
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DEMO_DIR = os.path.join(BASE_DIR, 'demo_web')
+MATL_DIR = os.path.join(BASE_DIR, 'material_segmentation')
+SENS_DIR = os.path.join(BASE_DIR, 'realsense')
+FILE_DIR = os.path.join(DEMO_DIR, 'results')
+
 def detect_objects(csv_file: str, saved_path: str, model_path: str = "yolo12x.pt") -> dict:
     # ----------------- 重建圖片 -----------------
     df = pd.read_csv(csv_file)
@@ -67,8 +73,7 @@ def detect_objects(csv_file: str, saved_path: str, model_path: str = "yolo12x.pt
         df.loc[mask, "bbox_x2"] = round(x2, 2)
         df.loc[mask, "bbox_y2"] = round(y2, 2)
 
-    os.makedirs(os.path.join(saved_path, 'results'), exist_ok=True)
-    output_file = os.path.join(saved_path, 'results', os.path.basename(csv_file).replace(".csv", "_with_objects.csv"))
+    output_file = os.path.join(saved_path, os.path.basename(csv_file).replace(".csv", "_with_objects.csv"))
     df.to_csv(output_file, index=False)
     print(f"更新後的 CSV 檔案已儲存為 {output_file}")
 
@@ -85,7 +90,6 @@ def detect_objects(csv_file: str, saved_path: str, model_path: str = "yolo12x.pt
 
 # only for testing
 if __name__ == "__main__":
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    csv_file = os.path.join(BASE_DIR, 'realsense', 'pointclouds', 'pointcloud_20250329_193301.csv')
-    saved_path = os.path.join(BASE_DIR, 'material_segmentation')
+    csv_file = os.path.join(FILE_DIR, 'test', 'pointcloud.csv')
+    saved_path = os.path.join(FILE_DIR, 'test')
     detect_objects(csv_file, saved_path)
