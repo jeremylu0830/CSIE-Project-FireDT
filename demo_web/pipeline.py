@@ -71,6 +71,10 @@ def run_pipeline(pic_input: str) -> dict:
         # 先建立自動化腳本 .ssf 檔案
         ssf_path = os.path.join(fds_dir, 'room_simulation.ssf')
         with open(ssf_path, 'w') as f:
+            # f.write('LOADINIFILE\n')
+            # f.write(' room_simulation.ini\n')
+            # f.write('SETVIEWPOINT\n')
+            # f.write(' view1')
             f.write('LOAD3DSMOKE\n')
             f.write(' TEMPERATURE\n')
             # &SLCF PBY=2, QUANTITY='TEMPERATURE'
@@ -80,7 +84,20 @@ def run_pipeline(pic_input: str) -> dict:
             f.write('1 0\n')
             f.write('room_simulation\n')
             f.write('MAKEMOVIE\n')
-            f.write('movie\n')
+            f.write('movie_fire\n')
+            f.write('room_simulation\n')
+            f.write('10\n')
+
+            f.write('LOAD3DSMOKE\n')
+            f.write(' SOOT DENSITY\n')
+            # &SLCF PBY=2, QUANTITY='TEMPERATURE'
+            f.write('LOADSLCF\n')
+            f.write(' PBY=2, QUANTITY=TEMPERATURE\n')
+            f.write('RENDERALL\n')
+            f.write('1 0\n')
+            f.write('room_simulation\n')
+            f.write('MAKEMOVIE\n')
+            f.write('movie_smoke\n')
             f.write('room_simulation\n')
             f.write('10\n')
 
