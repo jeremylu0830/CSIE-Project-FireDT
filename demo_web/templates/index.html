@@ -50,30 +50,34 @@
     </div>
   </div>
 </nav>
+<!-- Masthead-->
+<header class="masthead bg-primary text-white text-center">
+    <div class="container d-flex align-items-center flex-column">
+        <!-- Masthead Avatar Image-->
+        <div class="masthead-avatar mb-5">
+            <i class="fas fa-fire fa-8x mb-5 animated-fire"></i>
+        </div>
 
-        <!-- Masthead-->
-        <header class="masthead bg-primary text-white text-center">
-            <div class="container d-flex align-items-center flex-column">
-                <!-- Masthead Avatar Image-->
-                <div class="masthead-avatar mb-5">
-                    <!-- 行內樣式 -->
-                    <i class="fas fa-fire fa-8x mb-5 animated-fire"></i>
+        <!-- Masthead Heading-->
+        <h1 class="masthead-heading text-uppercase mb-3">Fire-Dt</h1>
 
+        <!-- Icon Divider-->
+        <div class="divider-custom divider-light mb-4">
+            <div class="divider-custom-line"></div>
+            <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
+            <div class="divider-custom-line"></div>
+        </div>
 
-                </div>
+        <!-- Research Description -->
+        <p class="text-center text-light mt-4 mb-4" style="font-size: 1.4rem; line-height: 1.6;">
+          我們是來自國立成功大學資訊工程學系的團隊，隊名是「No Cap」，團隊成員分別是魯倫愷、林本然、蔡侑傑。我們提出的作品「智慧火災逃生：數位孿生火災模擬」，這同時也是我們大學部的畢業專題，我悶希望建立一套系統，讓使用者只要上傳室內空間的 RGB-D 的影像或影片，就能透過我們的系統能夠讓使用者了解其室內空間發生火災時，整體環境會怎麼樣的變化，包括火勢的走向、煙霧分布的情況、室內溫度變化等。
+          </p>
 
-                <!-- Masthead Heading-->
-                <h1 class="masthead-heading text-uppercase mb-0">Fire-Dt</h1>
-                <!-- Icon Divider-->
-                <div class="divider-custom divider-light">
-                    <div class="divider-custom-line"></div>
-                    <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
-                    <div class="divider-custom-line"></div>
-                </div>
-                <!-- Masthead Subheading-->
-                <p class="masthead-subheading font-weight-light mb-0">團隊成員:魯倫愷、林本然、蔡侑傑</p>
-            </div>
-        </header>
+        <!-- Masthead Subheading-->
+    </div>
+</header>
+
+        
         <!-- Portfolio Section-->
         <!-- 把這一段替換原來的 Portfolio -->
 <section class="page-section portfolio" id="portfolio">
@@ -144,25 +148,30 @@
         </div>
 
         <!-- 只有在後端有 video_url 時，才顯示 <video> 播放器 -->
-        {% if video_url %}
-        <div class="row justify-content-center">
-          <div class="col-lg-10">
-            <div class="ratio ratio-16x9">
-              <video controls>
-                <source src="{{ video_url }}" type="video/mp4" />
-                您的瀏覽器不支援 HTML5 影片播放。
-              </video>
-            </div>
-          </div>
-        </div>
-        {% else %}
-        <!-- 如果沒有影片，也可以顯示一段提示文字（可自行修改或移除） -->
-        <div class="row justify-content-center">
-          <div class="col-lg-10 text-center">
-            <p class="text-white-50">尚未有影片，請先上傳檔案並等待處理完成。</p>
-          </div>
-        </div>
-        {% endif %}
+<!-- 在模板中顯示兩個影片 -->
+{% if video_urls %}
+<!-- 顯示兩個影片並排 -->
+<div class="video-container">
+    <div class="video-item">
+        <h2>影片 1</h2>
+        <video controls>
+            <source src="{{ video_urls['video1'] }}" type="video/mp4">
+            您的瀏覽器不支援 HTML5 影片。
+        </video>
+    </div>
+
+    <div class="video-item">
+        <h2>影片 2</h2>
+        <video controls>
+            <source src="{{ video_urls['video2'] }}" type="video/mp4">
+            您的瀏覽器不支援 HTML5 影片。
+        </video>
+    </div>
+</div>
+
+{% endif %}
+
+
       </div>
     </section>
 
