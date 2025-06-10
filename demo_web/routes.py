@@ -10,7 +10,7 @@ from flask_login import LoginManager, login_user, login_required, logout_user, c
 import os 
 import subprocess
 
-VIDEO_DIR = r"D:\CSIE_project\CSIE-Project-FireDT\material_segmentation\fds_output"
+VIDEO_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'material_segmentation', 'fds_output')
 AVI_PATH = os.path.join(VIDEO_DIR, "movie.avi")
 MP4_PATH = os.path.join(VIDEO_DIR, "movie.mp4")
 
@@ -88,7 +88,7 @@ def upload_files():
         return redirect(url_for('error_page', msg=error_msg))
 
     try:
-        data_path = os.path.join(os.path.dirname(__file__), '20250311_140524.bag')
+        data_path = os.path.join(os.path.dirname(__file__), '20250311_141600.bag')
         result = run_pipeline(pic_input=data_path)
         if os.path.exists(AVI_PATH):
         # 如果之前已經存在 MP4，就先刪掉，避免播放舊檔
