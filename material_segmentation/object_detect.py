@@ -78,11 +78,12 @@ def detect_objects(csv_file: str, saved_path: str, model_path: str = "yolo12x.pt
     print(f"更新後的 CSV 檔案已儲存為 {output_file}")
 
     # ----------------- 顯示 YOLO 結果 -----------------
-    # annotated_image = results.plot()
-    # plt.imshow(cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB))
-    # plt.title("YOLOv12 Detection")
-    # plt.axis('off')
+    annotated_image = results.plot()
+    plt.imshow(cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB))
+    plt.title("YOLOv12 Detection")
+    plt.axis('off')
     # plt.show()
+    plt.savefig(os.path.join(saved_path, 'yolo_detection_result.png'), bbox_inches='tight', pad_inches=0.1)
 
     return {
         'object_csv': output_file,
