@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="description" content="" />
         <meta name="author" content="" />
-        <title>Freelancer - Start Bootstrap Theme</title>
+        <title>Fire-DT 室內火災模擬系統</title>
         <!-- Favicon-->
         <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
         <!-- Font Awesome icons (free version)-->
@@ -33,11 +33,13 @@
     <div class="collapse navbar-collapse" id="navbarResponsive">
       <ul class="navbar-nav ms-auto">
         <li class="nav-item mx-0 mx-lg-1">
+          <a class="nav-link py-3 px-0 px-lg-3 rounded" href="#introduction">系統簡介</a>
+        </li>
+        <li class="nav-item mx-0 mx-lg-1">
           <a class="nav-link py-3 px-0 px-lg-3 rounded" href="#portfolio">檔案上傳</a>
         </li>
         <li class="nav-item mx-0 mx-lg-1">
-          <a class="nav-link py-3 px-0 px-lg-3 rounded" href="#about">回傳成果
-          </a>
+          <a class="nav-link py-3 px-0 px-lg-3 rounded" href="#about">回傳成果</a>
         </li>
         <li class="nav-item mx-0 mx-lg-1">
           <a class="nav-link py-3 px-0 px-lg-3 rounded" href="#contact">聯絡我們</a>
@@ -78,9 +80,9 @@
         <!-- 把這一段替換原來的 Portfolio -->
         
         <!-- Project Introduction Section-->
-        <section class="page-section bg-light" id="introduction">
+        <section class="page-section introduction bg-light" id="introduction">
             <div class="container">
-                <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">專題簡介</h2>
+                <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">系統簡介</h2>
                 <div class="divider-custom">
                     <div class="divider-custom-line"></div>
                     <div class="divider-custom-icon"><i class="fas fa-info-circle"></i></div>
@@ -95,29 +97,35 @@
                     </div>
                     <div class="carousel-inner">
                         <div class="carousel-item active">
-                            <div class="card intro-card mx-auto">
-                                <img src="assets/img/portfolio/cabin.png" class="card-img-top" alt="展示1" />
-                                <div class="card-body text-center">
-                                    <h5 class="card-title">智慧火災辨識</h5>
-                                    <p class="card-text">利用深度學習進行火源與材質解析，提升模擬準確性。</p>
-                                </div>
+                            <div class="card intro-card mx-auto d-flex flex-column flex-md-row">
+                              <div class="card-body image-container d-flex justify-content-center align-items-center">
+                                <img src="{{ url_for('static', filename='assets/img/introduction/coor.png') }}" class="card-img-top" alt="展示1" />
+                              </div>
+                              <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                                  <h3 class="card-title">座標系轉換</h3>
+                                  <p class="card-text">將 Intel RealSense D435 所拍攝之點雲透過線性轉換，得到更精確的世界座標</p>
+                              </div>
                             </div>
                         </div>
                         <div class="carousel-item">
-                            <div class="card intro-card mx-auto">
-                                <img src="assets/img/portfolio/cake.png" class="card-img-top" alt="展示2" />
-                                <div class="card-body text-center">
-                                    <h5 class="card-title">快速模擬</h5>
-                                    <p class="card-text">自動生成FDS腳本，快速還原火災發展過程。</p>
-                                </div>
+                            <div class="card intro-card mx-auto d-flex flex-column flex-md-row">
+                              <div class="card-body image-container d-flex justify-content-center align-items-center">
+                                <img src="{{ url_for('static', filename='assets/img/introduction/seg.png') }}" class="card-img-top" alt="展示2" />
+                              </div>
+                              <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                                  <h3 class="card-title">材質語義分割</h3>
+                                  <p class="card-text">利用深度學習模型結合條件隨機場演算法，清楚分割 23 種表面材質</p>
+                              </div>
                             </div>
                         </div>
                         <div class="carousel-item">
-                            <div class="card intro-card mx-auto">
-                                <img src="assets/img/portfolio/circus.png" class="card-img-top" alt="展示3" />
-                                <div class="card-body text-center">
-                                    <h5 class="card-title">三維視覺化</h5>
-                                    <p class="card-text">結合深度攝影機資料，呈現立體火場環境。</p>
+                            <div class="card intro-card mx-auto d-flex flex-column flex-md-row">
+                              <div class="card-body image-container d-flex justify-content-center align-items-center">
+                                <img src="{{ url_for('static', filename='assets/img/introduction/fds_soot.png') }}" class="card-img-top" alt="展示3" />
+                              </div>
+                              <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                                  <h3 class="card-title">FDS 室內火災模擬</h3>
+                                  <p class="card-text">自動生成火災動力學模擬軟體：FDS 的模擬用腳本，客製化還原室內火災發展過程。</p>
                                 </div>
                             </div>
                         </div>
@@ -133,56 +141,57 @@
                 </div>
             </div>
         </section>
-<section class="page-section portfolio" id="portfolio">
-  <div class="container">
-    <!-- 區塊標題 -->
-    <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">
-      上傳檔案
-    </h2>
-    <!-- 分隔線 -->
-    <div class="divider-custom mb-5">
-      <div class="divider-custom-line"></div>
-      <div class="divider-custom-icon"><i class="fas fa-upload"></i></div>
-      <div class="divider-custom-line"></div>
-    </div>
 
-    <!-- 上傳表單（Bootstrap 5 版本） -->
-    <div class="row justify-content-center">
-      <div class="col-lg-8">
-        <form
-          action="{{ url_for('upload_files') }}"
-          method="post"
-          enctype="multipart/form-data"
-          class="text-center"
-        >
-          <!-- ❶ 檔案輸入框：加上 form-control 使其套用 Bootstrap 樣式 -->
-          <div class="mb-3">
-            <label for="fileInput" class="form-label">選擇檔案</label>
-            <input
-              class="form-control"
-              type="file"
-              id="fileInput"
-              name="files"
-              multiple
-            />
-            <div class="form-text">可同時選擇多個檔案上傳</div>
+        <section class="page-section portfolio" id="portfolio">
+          <div class="container">
+            <!-- 區塊標題 -->
+            <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">
+              上傳檔案
+            </h2>
+            <!-- 分隔線 -->
+            <div class="divider-custom mb-5">
+              <div class="divider-custom-line"></div>
+              <div class="divider-custom-icon"><i class="fas fa-upload"></i></div>
+              <div class="divider-custom-line"></div>
+            </div>
+
+            <!-- 上傳表單（Bootstrap 5 版本） -->
+            <div class="row justify-content-center">
+              <div class="col-lg-8">
+                <form
+                  action="{{ url_for('upload_files') }}"
+                  method="post"
+                  enctype="multipart/form-data"
+                  class="text-center"
+                >
+                  <!-- ❶ 檔案輸入框：加上 form-control 使其套用 Bootstrap 樣式 -->
+                  <div class="mb-3">
+                    <label for="fileInput" class="form-label">選擇檔案</label>
+                    <input
+                      class="form-control"
+                      type="file"
+                      id="fileInput"
+                      name="files"
+                      multiple
+                    />
+                    <div class="form-text">可同時選擇多個檔案上傳</div>
+                  </div>
+
+                  <!-- ❷ 上傳按鈕：加上 btn btn-primary btn-lg，使按鈕符合主題 -->
+                  <button
+                    type="submit"
+                    class="btn btn-primary btn-lg"
+                  >
+                    <i class="fas fa-cloud-upload-alt me-2"></i>開始上傳
+                  </button>
+                </form>
+
+                <!-- 檔案預覽列表（可留著，如果要動態顯示檔案清單） -->
+                <ul id="fileList" class="list-group mt-4"></ul>
+              </div>
+            </div>
           </div>
-
-          <!-- ❷ 上傳按鈕：加上 btn btn-primary btn-lg，使按鈕符合主題 -->
-          <button
-            type="submit"
-            class="btn btn-primary btn-lg"
-          >
-            <i class="fas fa-cloud-upload-alt me-2"></i>開始上傳
-          </button>
-        </form>
-
-        <!-- 檔案預覽列表（可留著，如果要動態顯示檔案清單） -->
-        <ul id="fileList" class="list-group mt-4"></ul>
-      </div>
-    </div>
-  </div>
-</section>
+        </section>
 
 
  <!-- About Section (回傳成果區) -->
