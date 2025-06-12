@@ -52,7 +52,7 @@
           <a class="nav-link py-3 px-0 px-lg-3 rounded" href="#contact">聯絡我們</a>
         </li>
         <li class="nav-item mx-0 mx-lg-1">
-            <a class="nav-link py-3 px-0 px-lg-3 rounded" href="/login">登入</a>
+            <a class="nav-link py-3 px-0 px-lg-3 rounded" href="/logout">登出</a>
         </li>
 
     </div>
@@ -184,29 +184,21 @@
         </div>
         <div class="row justify-content-center">
             <div class="col-lg-10">
-                <p class="lead text-center">這裡會顯示你過去的上傳與處理記錄。</p>
 
-                <!-- 顯示上傳紀錄的表格 -->
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>上傳的檔案</th>
-                            <th>生成的 Fire 影片</th>
-                            <th>生成的 Smoke 影片</th>
-                            <th>上傳時間</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                <!-- member.html -->
+                {% if files %}
+                    <h2>歷史紀錄</h2>
+                    <ul>
                         {% for file in files %}
-                            <tr>
-                                <td>{{ file.file_name }}</td>
-                                <td>{{ file.file_name.split('_')[0] + '_fire.mp4' }}</td>  <!-- 取得 fire 影片 -->
-                                <td>{{ file.file_name.split('_')[0] + '_smoke.mp4' }}</td>  <!-- 取得 smoke 影片 -->
-                                <td>{{ file.uploaded_at }}</td>
-                            </tr>
+                            <li>
+                                <a href="{{ url_for('send_video_by_name', filename=file.file_name) }}">{{ file.file_name }}</a>
+                            </li>
                         {% endfor %}
-                    </tbody>
-                </table>
+                    </ul>
+                {% else %}
+                    <p>目前沒有歷史紀錄。</p>
+                {% endif %}
+
                                                 
             </div>
         </div>
