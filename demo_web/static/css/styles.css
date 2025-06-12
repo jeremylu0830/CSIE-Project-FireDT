@@ -87,6 +87,71 @@
   --bs-dark-rgb: 33, 33, 33;
 }
 
+/* Floating introduction cards */
+.page-section.introdiction::before {
+
+}
+
+.page-section.introduction {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+}
+.page-section.introduction::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url('/static/assets/img/introduction/classroom.png') center/cover no-repeat;
+  opacity: 0.2;
+  z-index: 0;
+}
+.page-section.introduction > .container {
+  position: relative;
+  z-index: 1;
+}
+
+
+.intro-card {
+  border: none;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+  max-width: 60rem;
+}
+
+.intro-card:hover {
+  transform: translateY(-0.5rem);
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.2);
+}
+
+#introCarousel .carousel-item {
+  padding: 1rem 0;
+}
+
+/* new: fixed-height wrapper */
+.image-container {
+  width: 100%;
+  height: 24rem;    /* 你原本想要的高度 */
+  overflow: hidden;
+}
+
+/* 桌機／平板（≥768px）：改為左右並排 50% */
+@media (min-width: 768px) {
+  .image-container {
+    width: 50%;
+  }
+}
+
+/* make images fill the wrapper */
+.image-container img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;    /* crop/scale to fill */
+}
+
+
 *,
 *::before,
 *::after {
@@ -10978,16 +11043,32 @@ html {
 .masthead {
   padding-top: calc(6rem + 74px);
   padding-bottom: 6rem;
+  position: relative;
+  overflow: hidden;
 }
 .masthead .masthead-heading {
   font-size: 2.75rem;
   line-height: 2.75rem;
+  color: #fff !important;
 }
 .masthead .masthead-subheading {
   font-size: 1.25rem;
+  color: #fff !important;
 }
 .masthead .masthead-avatar {
   width: 15rem;
+}
+.masthead::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url('/static/assets/img/header/roomfire.png') center/cover no-repeat;
+  opacity: 0.2;
+  z-index: 0;
+}
+.masthead > .container {
+  position: relative;
+  z-index: 1;
 }
 
 @media (min-width: 992px) {

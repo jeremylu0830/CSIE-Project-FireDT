@@ -187,7 +187,8 @@
         "half_length": 0.25,
         "width": 0.2,
         "half_width": 0.1,
-        "height": 0.3
+        "height": 0.3,
+        "half_height": 0.15
       },
       "components": {
         "body": {
@@ -198,6 +199,66 @@
             "height": 0.3
           },
           "FDS_template": "&OBST XB={{x_pos_min}},{{x_pos_max}},{{y_pos_min}},{{y_pos_max}},{{z_pos_min}},{{z_pos_max}}, SURF_ID='plastic' /"
+        }
+      }
+    },
+    "window": {
+      "default_dimensions": {
+        "width": 1.5,
+        "half_width": 0.75,
+        "length": 0.05,
+        "half_length": 0.025,
+        "height": 1.0,
+        "half_height": 0.5
+      },
+      "components": {
+        "frame": {
+          "position_offset": [0, 0, 0],
+          "dimensions": {
+            "width": 1.5,
+            "depth": 0.05,
+            "height": 0.1
+          },
+          "FDS_template": "&OBST XB={{x_pos_min}},{{x_pos_max}},{{y_pos_min}},{{y_pos_max}},{{z_pos_min}},{{z_pos_max}}, SURF_ID='metal' /"
+        },
+        "glass": {
+          "position_offset": [0, 0, 0],
+          "dimensions": {
+            "width": 1.5,
+            "depth": 0.05,
+            "height": 1.0
+          },
+          "FDS_template": "&OBST XB={{x_pos_min}},{{x_pos_max}},{{y_pos_min}},{{y_pos_max}},{{z_pos_min}},{{z_pos_max}}, SURF_ID='glass' /"
+        }
+      }
+    },
+    "door": {
+      "default_dimensions": {
+        "width": 1.0,
+        "half_width": 0.5,
+        "length": 0.1,
+        "half_length": 0.05,
+        "height": 2.0,
+        "half_height": 1.0
+      },
+      "components": {
+        "frame": {
+          "position_offset": [0, 0, 0],
+          "dimensions": {
+            "width": 1.0,
+            "depth": 0.1,
+            "height": 2.0
+          },
+          "FDS_template": "&OBST XB={{x_pos_min}},{{x_pos_max}},{{y_pos_min}},{{y_pos_max}},{{z_pos_min}},{{z_pos_max}}, SURF_ID='wood' /"
+        },
+        "panel": {
+          "position_offset": [0, 0, 0],
+          "dimensions": {
+            "width": 1.0,
+            "depth": 0.05,
+            "height": 2.0
+          },
+          "FDS_template": "&OBST XB={{x_pos_min}},{{x_pos_max}},{{y_pos_min}},{{y_pos_max}},{{z_pos_min}},{{z_pos_max}}, SURF_ID='wood' /"
         }
       }
     }
