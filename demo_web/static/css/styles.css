@@ -11003,6 +11003,7 @@ html {
     font-size: 1.5rem;
   }
 }
+
 .portfolio .portfolio-item {
   cursor: pointer;
   position: relative;
@@ -11095,4 +11096,14 @@ html {
     opacity: 1;
     text-shadow: 0 0 10px #ff6f00;
   }
+}
+.video-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px; /* 給每個影片間距 */
+}
+
+.video-container video {
+    width: 48%; /* 使影片佔據一半的寬度，兩個影片並排顯示 */
+    height: 360px; /* 設置固定高度 */
 }

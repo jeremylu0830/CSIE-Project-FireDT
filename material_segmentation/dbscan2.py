@@ -1,74 +1,120 @@
 import pandas as pd
+import numpy as np
+import json
 import os
-from sklearn.cluster import DBSCAN
 
-def dbscan_clustering(
-    data_path: str,
-    img_num: str,
-    eps: float = 0.1,
-    min_samples: int = 5
-) -> dict:
-    # 讀取原始 CSV（包含所有行，即使 object_label 為空）
-    df = pd.read_csv(data_path, low_memory=False)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DEMO_DIR = os.path.join(BASE_DIR, 'demo_web')
+MATL_DIR = os.path.join(BASE_DIR, 'material_segmentation')
+SENS_DIR = os.path.join(BASE_DIR, 'realsense')
+FILE_DIR = os.path.join(DEMO_DIR, 'results')
 
-    # 新增一欄位放分群後的 cluster id，預設為 -1（noise）
-    df['cluster'] = -1
-    next_cluster_id = 0
+def dbscan_clustering(input_csv: str, out_dir: str = None) -> dict:
+    """
+    讀入一個包含欄位 [x, y, z, material, object_num, ...] 的 CSV 檔，
+    對於每一個 object_num：
+      1. 找出該 object_num 底下最常出現的 material（眾數）。
+      2. 只保留屬於那個 material 的點，然後分別計算 x, y, z 的 10th 和 90th percentile：
+         - x_min = 10th percentile of x
+         - x_max = 90th percentile of x
+         - y_min = 10th percentile of y
+         - y_max = 90th percentile of y
+         - z_min = 10th percentile of z
+         - z_max = 90th percentile of z
+      3. 將這些結果組成 dict, 並依序寫入 output_data["objects"]。
 
-    # 依 material 分組，對每個材質群跑 DBSCAN
-    for material, sub_df in df.groupby('material'):
-        # 取該材質下所有點的座標
-        X = sub_df[['x', 'y', 'z']].values
+    參數：
+      - input_csv (str)：輸入 CSV 的路徑，需包含欄位 'x','y','z','material','object_num'。
+      - output_path (str, optional)：若提供，最後會把結果存成 JSON 到此路徑。
+    
+    回傳：
+      - dict，格式如下：
+        {
+          "objects": [
+            {
+              "object_num": ...,
+              "material": "<mode material>",
+              "bounds": {
+                "x_min": ...,
+                "x_max": ...,
+                "y_min": ...,
+                "y_max": ...,
+                "z_min": ...,
+                "z_max": ...
+              }
+            },
+            ...
+          ]
+        }
+    """
+    # 1. 讀取 CSV
+    df = pd.read_csv(input_csv)
 
-        # 如果這個材質的點太少，全部先維持為 -1（noise）
-        if len(X) < min_samples:
-            df.loc[sub_df.index, 'cluster'] = -1
+    # 確認必要欄位存在
+    required_cols = {'x', 'y', 'z', 'material', 'object_num'}
+    missing = required_cols - set(df.columns)
+    if missing:
+        raise ValueError(f"輸入 CSV 缺少以下必要欄位：{missing}")
+
+    output_data = { "objects": [] }
+
+    # 2. 針對每個 object_num 群組
+    for obj_id, group in df.groupby('object_num'):
+        # 跳過 NaN 或空白的 object_num
+        if pd.isna(obj_id):
             continue
 
-        # 在此材質子集內做 DBSCAN
-        clustering = DBSCAN(eps=eps, min_samples=min_samples)
-        labels = clustering.fit_predict(X)
-        # labels 內：-1 表示 noise，其餘 0,1,2,… 是該材質內部的群集編號
+        # 2a. 找該群組最常出現的 material
+        mode_material = group['material'].mode()
+        if mode_material.empty:
+            # 若這個群組所有 material 都是 NaN 或空值，就跳過
+            continue
+        mode_material = mode_material.iloc[0]
 
-        # 把這些子群集編號加上偏移量 next_cluster_id
-        mapped = []
-        for lbl in labels:
-            if lbl == -1:
-                mapped.append(-1)
-            else:
-                mapped.append(lbl + next_cluster_id)
-        df.loc[sub_df.index, 'cluster'] = mapped
+        # 2b. 從群組中只保留該 mode_material 的點
+        mat_points = group.loc[group['material'] == mode_material]
+        if mat_points.empty:
+            # 如果沒有任何點屬於 mode_material，就跳過
+            continue
 
-        # 更新下一個材質的偏移量（如果這個材質分出了 k 個群集，就 +k）
-        max_lbl = labels.max()
-        if max_lbl >= 0:
-            next_cluster_id += (max_lbl + 1)
+        # 2c. 計算 x,y,z 的 10th, 90th percentile
+        x_vals = mat_points['x'].values
+        y_vals = mat_points['y'].values
+        z_vals = mat_points['z'].values
 
-    # 最後依 material, object_label, cluster 做排序（方便人工檢查）
-    df.sort_values(
-        by=['material', 'object_label', 'cluster'],
-        ascending=[True, False, True],
-        inplace=True
-    )
+        x_min = float(np.percentile(x_vals, 10))
+        x_max = float(np.percentile(x_vals, 90))
+        y_min = float(np.percentile(y_vals, 10))
+        y_max = float(np.percentile(y_vals, 90))
+        z_min = float(np.percentile(z_vals, 10))
+        z_max = float(np.percentile(z_vals, 90))
+
+        # 2d. 將結果加入 output_data
+        output_data["objects"].append({
+            "object_num": int(obj_id),
+            "material": mode_material,
+            "bounds": {
+                "x_min": x_min,
+                "x_max": x_max,
+                "y_min": y_min,
+                "y_max": y_max,
+                "z_min": z_min,
+                "z_max": z_max
+            }
+        })
 
     # 輸出更新後的 CSV
-    output_path = os.path.join(
-        os.path.dirname(data_path),
-        f'pointcloud_{img_num}_clustered.csv'
-    )
+    output_path = os.path.join(out_dir, f'pointcloud_clustered.csv')
     df.to_csv(output_path, index=False)
 
     return {
         'cluster_path': output_path
     }
 
-# 範例呼叫：
+# -------------------------
+# 範例使用方式
+# -------------------------
 if __name__ == "__main__":
     img_num = '20250329_193301'
-    data_file = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)),
-        'results',
-        f'pointcloud_{img_num}_with_material.csv'
-    )
-    result = dbscan_clustering(data_file, img_num, eps=0.1, min_samples=5)
-    print("[INFO] 分群結果已存於：", result['cluster_path'])
+    data_path = os.path.join(FILE_DIR, f'pointcloud_{img_num}_with_materials.csv')
+    result = dbscan_clustering(data_path, img_num)

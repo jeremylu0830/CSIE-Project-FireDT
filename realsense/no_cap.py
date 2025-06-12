@@ -7,17 +7,15 @@ import pyrealsense2 as rs
 import numpy as np
 import pandas as pd
 import cv2
-import time
 import os
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DEMO_DIR = os.path.join(BASE_DIR, 'demo_web')
+MATL_DIR = os.path.join(BASE_DIR, 'material_segmentation')
+SENS_DIR = os.path.join(BASE_DIR, 'realsense')
+FILE_DIR = os.path.join(DEMO_DIR, 'results')
 
-def no_cap(base_dir: str, bag_file: str) -> dict:
-    os.makedirs(os.path.join(base_dir, 'bags'), exist_ok=True)
-    os.makedirs(os.path.join(base_dir, 'output_frames'), exist_ok=True)
-    os.makedirs(os.path.join(base_dir, 'videos'), exist_ok=True)
-    os.makedirs(os.path.join(base_dir, 'pointclouds'), exist_ok=True)
-    os.makedirs(os.path.join(base_dir, 'projections'), exist_ok=True)
-
+def no_cap(bag_file: str, out_dir: str) -> dict:
     pipeline = rs.pipeline()
     config = rs.config()
     config.enable_device_from_file(bag_file, False)
@@ -31,7 +29,7 @@ def no_cap(base_dir: str, bag_file: str) -> dict:
                 print("[INFO] No more frames available, exiting.")
                 break
             current_frame += 1
-            if current_frame < 320:
+            if current_frame < 10:
                 continue
 
             align = rs.align(rs.stream.color)
@@ -64,10 +62,9 @@ def no_cap(base_dir: str, bag_file: str) -> dict:
                 r, g, b = b, g, r
                 cv2.circle(blank_image, (tex_x[i], tex_y[i]), 2, (int(r), int(g), int(b)), -1)
 
-            timestamp = time.strftime("%Y%m%d_%H%M%S")
-            projection_path = os.path.join(base_dir, 'projections', f"projection_{timestamp}.png")
+            projection_path = os.path.join(out_dir, f"projection.png")
             cv2.imwrite(projection_path, color_image[:, :, ::-1])
-            print(f"[INFO] saved projection_{timestamp}.png")
+            print(f"[INFO] saved projection.png")
 
             data = {
                 'x': vtx[:, 0],
@@ -80,14 +77,13 @@ def no_cap(base_dir: str, bag_file: str) -> dict:
                 'B': colors[:, 0]
             }
             df = pd.DataFrame(data)
-            pointcloud_path = os.path.join(base_dir, 'pointclouds', f"pointcloud_{timestamp}.csv")
+            pointcloud_path = os.path.join(out_dir, f"pointcloud.csv")
             df.to_csv(pointcloud_path, index=False)
-            print(f"[INFO] saved pointcloud_{timestamp}.csv")
+            print(f"[INFO] saved pointcloud.csv")
 
             return {
                 'projection': projection_path,
-                'pointcloud': pointcloud_path,
-                'timestamp': timestamp,
+                'pointcloud': pointcloud_path
             }
 
     finally:
@@ -97,7 +93,6 @@ def no_cap(base_dir: str, bag_file: str) -> dict:
 
 # only for testing
 if __name__ == "__main__":
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    bag_file = os.path.join(base_dir, 'bags', '20250311_141600.bag')
+    bag_file = os.path.join(DEMO_DIR, '20250605_171439.bag')
     print(bag_file)
-    real_out = no_cap(base_dir, bag_file)
+    real_out = no_cap(bag_file, os.path.join(FILE_DIR, 'test'))

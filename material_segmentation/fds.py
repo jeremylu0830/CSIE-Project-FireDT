@@ -1,6 +1,12 @@
 import json
 import os
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DEMO_DIR = os.path.join(BASE_DIR, 'demo_web')
+MATL_DIR = os.path.join(BASE_DIR, 'material_segmentation')
+SENS_DIR = os.path.join(BASE_DIR, 'realsense')
+FILE_DIR = os.path.join(DEMO_DIR, 'results')
+
 MATERIAL_COLORS = {
     'brick': (139, 69, 19),
     'carpet': (128, 0, 128),
@@ -293,8 +299,7 @@ def generate_fds(input_json_path, static_json_path, output_fds_path):
 
 # only for testing
 if __name__ == "__main__":
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    input_json = os.path.join(BASE_DIR, "room_simulation.json")
-    static_json = os.path.join(BASE_DIR, "static.json")
-    output_fds = os.path.join(BASE_DIR, "fds_output", "room_simulation.fds")
+    input_json = os.path.join(FILE_DIR, 'test', "room_simulation.json")
+    static_json = os.path.join(MATL_DIR, "static.json")
+    output_fds = os.path.join(MATL_DIR, "fds_output", "room_simulation.fds")
     generate_fds(input_json, static_json, output_fds)

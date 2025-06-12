@@ -4,6 +4,12 @@ import pandas as pd
 import os
 # import open3d as o3d
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DEMO_DIR = os.path.join(BASE_DIR, 'demo_web')
+MATL_DIR = os.path.join(BASE_DIR, 'material_segmentation')
+SENS_DIR = os.path.join(BASE_DIR, 'realsense')
+FILE_DIR = os.path.join(DEMO_DIR, 'results')
+
 referencePoints_pixelDepth = [
     [475, 83, 691],
     [958, 130, 638],
@@ -118,7 +124,6 @@ def world_coordinates(bag_file: str, csv_file: str, output_csv: str = None) -> s
     return output_csv
 
 if __name__ == "__main__":
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    bag_file = os.path.join(BASE_DIR, 'bags', '20250311_141600.bag')
-    csv_file = os.path.join(BASE_DIR, 'pointclouds', 'pointcloud_20250329_193301.csv')
+    bag_file = os.path.join(DEMO_DIR, '20250311_141600.bag')
+    csv_file = os.path.join(FILE_DIR, 'test', 'pointcloud.csv')
     world_coordinates(bag_file, csv_file)

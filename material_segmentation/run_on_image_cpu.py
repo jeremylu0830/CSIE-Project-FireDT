@@ -11,6 +11,12 @@ import os
 from material_segmentation.models.vgg import vgg16
 from material_segmentation.models.googlenet import googlenet
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DEMO_DIR = os.path.join(BASE_DIR, 'demo_web')
+MATL_DIR = os.path.join(BASE_DIR, 'material_segmentation')
+SENS_DIR = os.path.join(BASE_DIR, 'realsense')
+FILE_DIR = os.path.join(DEMO_DIR, 'results')
+
 def color_image_w_masks(image, masks):
     image = image.astype(np.uint8)
 
@@ -118,23 +124,21 @@ def get_material(row, labelmap, labels):
         return ""
     
 #%%
-def run_on_image_cpu(base_dir: str, img_num: str, img_path: str, point_path: str) -> dict:
+def run_on_image_cpu(img_path: str, point_path: str, out_dir: str) -> dict:
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
-    os.makedirs(os.path.join(base_dir, 'videos'), exist_ok=True)
-    os.makedirs(os.path.join(base_dir, 'images'), exist_ok=True)
-    os.makedirs(os.path.join(base_dir, 'results'), exist_ok=True)
-    os.makedirs(os.path.join(base_dir, 'labelmaps'), exist_ok=True)
-    os.makedirs(os.path.join(base_dir, 'fds_output'), exist_ok=True)
+    os.makedirs(os.path.join(MATL_DIR, 'results'), exist_ok=True)
+    os.makedirs(os.path.join(MATL_DIR, 'labelmaps'), exist_ok=True)
+    os.makedirs(os.path.join(MATL_DIR, 'fds_output'), exist_ok=True)
 
     model0 = googlenet
     m0 = model0()
-    m0.load_state_dict(torch.load(os.path.join(base_dir, 'weights', 'minc-googlenet.pth'), 
+    m0.load_state_dict(torch.load(os.path.join(MATL_DIR, 'weights', 'minc-googlenet.pth'), 
                                 weights_only=True), strict=False)
     m0.eval()
 
     torch.set_grad_enabled(False)
 
-    labels = open(os.path.join(base_dir, 'categories.txt'), 'r').readlines()
+    labels = open(os.path.join(MATL_DIR, 'categories.txt'), 'r').readlines()
     labels = [i.strip() for i in labels]
 
     postprocessor = DenseCRF(
@@ -174,30 +178,29 @@ def run_on_image_cpu(base_dir: str, img_num: str, img_path: str, point_path: str
     # 添加圖例
     legend_elements = []
     for i in range(23):
-        color = np.loadtxt(os.path.join(base_dir, 'palette.txt')).astype(np.uint8)[i]
+        color = np.loadtxt(os.path.join(MATL_DIR, 'palette.txt')).astype(np.uint8)[i]
         color = tuple(color / 255.0)  # 轉換為matplotlib可用的顏色格式
         legend_elements.append(plt.Rectangle((0, 0), 1, 1, fc=color, label=labels[i]))
     
     plt.legend(handles=legend_elements, bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
     plt.tight_layout()
-    plt.savefig(os.path.join(base_dir, 'results', f"result_{img_num}.png"), bbox_inches='tight')
-    np.savetxt(os.path.join(base_dir, 'labelmaps', f"test_{img_num}_labelmap.txt"), labelmap, fmt='%d')
+    plt.savefig(os.path.join(MATL_DIR, 'results', f"result.png"), bbox_inches='tight')
+    np.savetxt(os.path.join(MATL_DIR, 'labelmaps', f"test_labelmap.txt"), labelmap, fmt='%d')
 
     df['material'] = df.apply(lambda row: get_material(row, labelmap, labels), axis=1)
-    output_csv_path = os.path.join(base_dir, 'results', f'pointcloud_{img_num}_with_material.csv')
+    output_csv_path = os.path.join(out_dir, f'pointcloud_with_material.csv')
     df.to_csv(output_csv_path, index=False)
 
     return {
         'labelmap': labelmap,
         'labels': labels,
-        'result_image': os.path.join(base_dir, 'results', f"result_{img_num}.png"),
+        'result_image': os.path.join(MATL_DIR, 'results', f"result.png"),
         'output_csv': output_csv_path
     }
     
 # only for testing
 if __name__ == "__main__":
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    img_num = '20250329_193301'
-    img_path = os.path.join(os.path.dirname(base_dir), 'realsense', 'projections', f'projection_{img_num}.png')
-    point_path = os.path.join(base_dir, 'results', f'pointcloud_{img_num}_with_objects.csv')
-    run_on_image_cpu(base_dir, img_num, img_path, point_path)
+    out_dir = os.path.join(FILE_DIR, 'test')
+    img_path = os.path.join(FILE_DIR, 'test', 'projection.png')
+    point_path = os.path.join(FILE_DIR, 'test', 'pointcloud_with_objects.csv')
+    run_on_image_cpu(img_path, point_path, out_dir)
