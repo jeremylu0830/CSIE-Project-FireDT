@@ -87,6 +87,26 @@
   --bs-dark-rgb: 33, 33, 33;
 }
 
+/* Floating introduction cards */
+.intro-card {
+  border: none;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+  max-width: 20rem;
+}
+
+.intro-card:hover {
+  transform: translateY(-0.5rem);
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.2);
+}
+
+#introCarousel .carousel-item {
+  padding: 1rem 0;
+}
+
+
 *,
 *::before,
 *::after {
@@ -10982,9 +11002,11 @@ html {
 .masthead .masthead-heading {
   font-size: 2.75rem;
   line-height: 2.75rem;
+  color: #fff !important;
 }
 .masthead .masthead-subheading {
   font-size: 1.25rem;
+  color: #fff !important;
 }
 .masthead .masthead-avatar {
   width: 15rem;
