@@ -14,7 +14,7 @@ MATERIAL_COLORS = {
     'fabric': (255, 182, 193),
     'foliage': (34, 139, 34),
     'food': (255, 165, 0),
-    'glass': (173, 216, 230),
+    'glass': (0, 255, 255),
     'hair': (101, 67, 33),
     'leather': (51, 0, 102),
     'metal': (192, 192, 192),
@@ -41,6 +41,7 @@ MATL_PARAM = {
     'Wood': ['pyrosim Yello Pine', 2.85, 0.14, 640, 0, 0],
     'Ceramic': ['pyrosim Gypsum', 1.09, 0.17, 930, 0, 0],
     'Foam': ['pyrosim Foam', 1.0, 0.05, 40, 0, 30000],
+    'Glass': ['pyrosim Glass', 0.835, 1.4, 2225, 0, 0],
 }
 
 # SURF 可將複合種 MATL 套用到實際表面
@@ -94,6 +95,14 @@ SURF_PARAM = {
             {'matl_id': 'Foam', 'mass_fraction': 1.0, 'thickness': 0.05}
         ]
     },
+    'glass': {
+        'rgb': MATERIAL_COLORS['glass'],
+        'burn_away': False,
+        'backing': 'VOID',
+        'layers': [
+            {'matl_id': 'Glass', 'mass_fraction': 1.0, 'thickness': 0.01}
+        ]
+    }
 }
 
 def generate_object_fds(obj, static_table, f):
@@ -138,10 +147,16 @@ def generate_object_fds(obj, static_table, f):
             x_max = x_pos + half_w
             y_min = y_pos - half_d
             y_max = y_pos + half_d
-
-            # 一般組件
             z_min = z_offset
             z_max = z_offset + h
+            
+            # 如果是窗，則 z 軸的 min/max 需要調整
+            if label == 'window' and name == 'frame':
+                z_min = 0.95
+                z_max = 1.0
+            elif label == 'window':
+                z_min = 1.0
+                z_max = 2.0
 
             # 替換模板
             code = comp['FDS_template']
@@ -152,9 +167,8 @@ def generate_object_fds(obj, static_table, f):
             code = code.replace("{{z_pos_min}}", f"{z_min:.3f}")
             code = code.replace("{{z_pos_max}}", f"{z_max:.3f}")
             f.write(code + "\n")
-            
-    f.write(code + "\n")
 
+    f.write(code + "\n")
 
 def generate_fds(input_json_path, static_json_path, output_fds_path):
     with open(input_json_path, 'r', encoding='utf-8') as f:
@@ -166,6 +180,20 @@ def generate_fds(input_json_path, static_json_path, output_fds_path):
     space_dimensions = data['space_dimensions']
     objects = data['objects']
     
+    # 檢查是否有門或窗，若沒有則預設添加一個
+    has_door = any(obj['object_label'] == 'door' for obj in objects)
+    has_window = any(obj['object_label'] == 'window' for obj in objects)
+
+    # 相當於在 build_obs.py 中的物件位置，所以 z_min 和 z_max 其實是 fds 的 y軸
+    door_position = {'x_min': space_dimensions['x']-1.11, 'x_max': space_dimensions['x']-0.12, 'y_min': 0.0, 'y_max': 2.0, 'z_min': 0.0, 'z_max': 0.2}
+    window_position = {'x_min': space_dimensions['x'] / 2 - 0.75, 'x_max': space_dimensions['x'] / 2 + 0.75, 
+                       'y_min': 0.0, 'y_max': 0.0, 
+                       'z_min': space_dimensions['z'], 'z_max': space_dimensions['z'] - 0.3}
+    if not has_door:
+        objects.append({'object_label': 'door', 'bounds': door_position, 'cluster_id': 'N/A'})
+    if not has_window:
+        objects.append({'object_label': 'window', 'bounds': window_position, 'cluster_id': 'N/A'})
+
     with open(output_fds_path, 'w') as f:
         # --- HEAD & TIME 區塊 (假設這裡已經有了) ---
         f.write("&HEAD CHID='room_simulation', TITLE='Room with detected objects' /\n\n")
@@ -244,6 +272,7 @@ def generate_fds(input_json_path, static_json_path, output_fds_path):
         f.write("&SURF ID='FIRE',\n")
         f.write("      HRRPUA=1000.0,\n")
         f.write("      COLOR='RED' /\n\n")
+        f.write("&SURF ID='exhaust', VOLUME_FLOW=1, COLOR='BLUE' /\n")
         for surf_name, params in SURF_PARAM.items():
             r, g, b = params['rgb']
             burn_away_flag = ".TRUE." if params['burn_away'] else ".FALSE."
@@ -266,7 +295,7 @@ def generate_fds(input_json_path, static_json_path, output_fds_path):
                 f.write(f"      THICKNESS({idx})={thickness}")
                 f.write(",\n" if idx < len(layers) else " /\n\n")
 
-        # --- objects / Fire Source / SLCF / TAIL ... ---
+        # --- objects --- 
         f.write("! Object definitions\n")
         f.write("! Walls\n")
         f.write(f"&OBST XB=0,{space_dimensions['x']},0,0.1,0,{space_dimensions['y']}, SURF_ID='ceramic' /\n")
@@ -277,13 +306,24 @@ def generate_fds(input_json_path, static_json_path, output_fds_path):
         for obj in objects:
             bounds = obj['bounds']
             object_label = obj['object_label']
-            cluster_id = obj.get('cluster_id', 'N/A')
+            cluster_id = obj.get('object_num', 'N/A')
 
             if object_label is not None:
-                f.write(f"! {object_label} (Cluster {cluster_id})\n")
+                f.write(f"! {object_label} (Object {cluster_id})\n")
 
             generate_object_fds(obj, static_table, f)
 
+        # # --- VENT ---
+        # if not has_door:
+        #     f.write(f"&VENT ID='VentDoor',\n")
+        #     f.write(f"      XB={door_position['x_min']},{door_position['x_max']},{door_position['y_min']},{door_position['y_max']},{door_position['z_min']},{door_position['z_max']},\n")
+        #     f.write(f"      SURF_ID='exhaust' /\n")
+        # if not has_window:
+        #     f.write(f"&VENT ID='VentWindow',\n")
+        #     f.write(f"      XB={window_position['x_min']},{window_position['x_max']},{window_position['y_min']},{window_position['y_max']},{window_position['z_min']},{window_position['z_max']},\n")
+        #     f.write(f"      SURF_ID='exhaust' /\n")
+        
+        # --- Fire Source / SLCF / TAIL ... ---
         f.write("! Fire source\n")
         f.write(f"&OBST XB={space_dimensions['x']/2 - 0.5:.3f},"
                 f"{space_dimensions['x']/2 + 0.5:.3f},"
